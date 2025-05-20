@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results - StrategyMasters</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container-fluid dashboard-container">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h1>StrategyMasters: The Smartphone Industry Challenge</h1>
+                <h3>Final Results</h3>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="alert alert-success">
+                    Game Completed
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4>Final Rankings</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Rank</th>
+                                        <th>Company</th>
+                                        <th>Total Score</th>
+                                        <th>Financial</th>
+                                        <th>Market</th>
+                                        <th>Innovation</th>
+                                        <th>Sustainability</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="finalRankingsTableBody">
+                                    <tr>
+                                        <td colspan="7" class="text-center">Loading final rankings...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h4>Market Share Evolution</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="marketShareEvolutionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h4>Score Evolution</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="scoreEvolutionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h4>Performance Analysis</h4>
+                    </div>
+                    <div class="card-body">
+                        <ul class="nav nav-tabs" id="analysisTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="financial-tab" data-bs-toggle="tab" data-bs-target="#financial" type="button" role="tab" aria-controls="financial" aria-selected="true">Financial</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="market-tab" data-bs-toggle="tab" data-bs-target="#market" type="button" role="tab" aria-controls="market" aria-selected="false">Market</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="innovation-tab" data-bs-toggle="tab" data-bs-target="#innovation" type="button" role="tab" aria-controls="innovation" aria-selected="false">Innovation</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="sustainability-tab" data-bs-toggle="tab" data-bs-target="#sustainability" type="button" role="tab" aria-controls="sustainability" aria-selected="false">Sustainability</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="analysisTabsContent">
+                            <div class="tab-pane fade show active" id="financial" role="tabpanel" aria-labelledby="financial-tab">
+                                <div class="p-3">
+                                    <h5>Financial Performance</h5>
+                                    <div class="chart-container">
+                                        <canvas id="financialChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="market" role="tabpanel" aria-labelledby="market-tab">
+                                <div class="p-3">
+                                    <h5>Market Performance</h5>
+                                    <div class="chart-container">
+                                        <canvas id="marketChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="innovation" role="tabpanel" aria-labelledby="innovation-tab">
+                                <div class="p-3">
+                                    <h5>Innovation Performance</h5>
+                                    <div class="chart-container">
+                                        <canvas id="innovationChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="sustainability" role="tabpanel" aria-labelledby="sustainability-tab">
+                                <div class="p-3">
+                                    <h5>Sustainability Performance</h5>
+                                    <div class="chart-container">
+                                        <canvas id="sustainabilityChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <h4>Learning Outcomes</h4>
+                    </div>
+                    <div class="card-body">
+                        <h5>Key Strategic Concepts Applied</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-header">Porter's Five Forces</div>
+                                    <div class="card-body">
+                                        <p>This simulation demonstrated how competitive forces shape strategy in the smartphone industry:</p>
+                                        <ul>
+                                            <li><strong>Competitive Rivalry:</strong> Teams directly competed for market share across different segments</li>
+                                            <li><strong>Supplier Power:</strong> Component quality and costs affected product development</li>
+                                            <li><strong>Buyer Power:</strong> Different market segments showed varying price sensitivity</li>
+                                            <li><strong>Threat of New Entrants:</strong> Strategic events introduced new competitors</li>
+                                            <li><strong>Threat of Substitutes:</strong> Innovation was required to maintain relevance</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-header">Generic Strategies</div>
+                                    <div class="card-body">
+                                        <p>Teams employed different strategic approaches:</p>
+                                        <ul>
+                                            <li><strong>Cost Leadership:</strong> Competing on price in budget segments</li>
+                                            <li><strong>Differentiation:</strong> Creating unique value through quality and features</li>
+                                            <li><strong>Focus:</strong> Specializing in specific market segments</li>
+                                            <li><strong>Integrated Strategies:</strong> Balancing multiple approaches</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-header">Resource-Based View</div>
+                                    <div class="card-body">
+                                        <p>Teams developed unique capabilities and resources:</p>
+                                        <ul>
+                                            <li><strong>R&D Capability:</strong> Investment in innovation capacity</li>
+                                            <li><strong>Brand Strength:</strong> Building customer loyalty and recognition</li>
+                                            <li><strong>Production Capacity:</strong> Scaling operations to meet demand</li>
+                                            <li><strong>Quality Control:</strong> Ensuring consistent product quality</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <div class="card-header">Balanced Scorecard</div>
+                                    <div class="card-body">
+                                        <p>Performance was measured across multiple dimensions:</p>
+                                        <ul>
+                                            <li><strong>Financial:</strong> Profitability, revenue growth, and capital efficiency</li>
+                                            <li><strong>Market:</strong> Market share, customer satisfaction, and brand strength</li>
+                                            <li><strong>Innovation:</strong> R&D effectiveness and new product development</li>
+                                            <li><strong>Sustainability:</strong> Environmental impact and social responsibility</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h5 class="mt-4">Reflection Questions for Teams</h5>
+                        <ol>
+                            <li>How did your strategic positioning evolve over the course of the simulation?</li>
+                            <li>What trade-offs did you make in resource allocation, and how did they impact your results?</li>
+                            <li>How did you respond to market changes and strategic events?</li>
+                            <li>What would you do differently if you played again?</li>
+                            <li>How do the concepts from this simulation apply to real-world business strategy?</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fetch final rankings
+            fetch(`/api/rankings/{{ game_id }}`)
+                .then(response => response.json())
+                .then(rankings => {
+                    const rankingsBody = document.getElementById('finalRankingsTableBody');
+                    if (rankingsBody) {
+                        rankingsBody.innerHTML = '';
+                        
+                        rankings.forEach(team => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${team.rank}</td>
+                                <td>${team.name}</td>
+                                <td>${team.score.toFixed(1)}</td>
+                                <td>${team.financial_score.toFixed(1)}</td>
+                                <td>${team.market_score.toFixed(1)}</td>
+                                <td>${team.innovation_score.toFixed(1)}</td>
+                                <td>${team.sustainability_score.toFixed(1)}</td>
+                            `;
+                            rankingsBody.appendChild(row);
+                        });
+                    }
+                    
+                    // Initialize charts with the data
+                    initializeCharts(rankings);
+                })
+                .catch(error => {
+                    console.error('Error fetching rankings:', error);
+                });
+                
+            function initializeCharts(rankings) {
+                // Sample data for charts - in a real implementation, this would come from the backend
+                const rounds = Array.from({length: 10}, (_, i) => `Round ${i+1}`);
+                const companies = rankings.map(r => r.name);
+                const colors = [
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(153, 102, 255, 0.7)'
+                ];
+                
+                // Market Share Evolution Chart
+                const marketShareCtx = document.getElementById('marketShareEvolutionChart').getContext('2d');
+                new Chart(marketShareCtx, {
+                    type: 'line',
+                    data: {
+                        labels: rounds,
+                        datasets: companies.map((company, index) => ({
+                            label: company,
+                            data: generateRandomData(10, 0, 50),
+                            borderColor: colors[index % colors.length],
+                            backgroundColor: colors[index % colors.length].replace('0.7', '0.1'),
+                            tension: 0.1,
+                            fill: false
+                        }))
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Market Share % by Round'
+                            },
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                title: {
+                                    display: true,
+                                    text: 'Market Share %'
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // Score Evolution Chart
+                const scoreCtx = document.getElementById('scoreEvolutionChart').getContext('2d');
+                new Chart(scoreCtx, {
+                    type: 'line',
+                    data: {
+                        labels: rounds,
+                        datasets: companies.map((company, index) => ({
+                            label: company,
+                            data: generateRandomData(10, 30, 90),
+                            borderColor: colors[index % colors.length],
+                            backgroundColor: colors[index % colors.length].replace('0.7', '0.1'),
+                            tension: 0.1,
+                            fill: false
+                        }))
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Total Score by Round'
+                            },
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                title: {
+                                    display: true,
+                                    text: 'Score'
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // Financial Chart
+                const financialCtx = document.getElementById('financialChart').getContext('2d');
+                new Chart(financialCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: companies,
+                        datasets: [
+                            {
+                                label: 'Revenue',
+                                data: rankings.map(r => Math.random() * 1000 + 500),
+                                backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                            },
+                            {
+                                label: 'Profit',
+                                data: rankings.map(r => Math.random() * 300 + 100),
+                                backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Financial Performance ($ millions)'
+                            },
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: '$ Millions'
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // Market Chart
+                const marketCtx = document.getElementById('marketChart').getContext('2d');
+                new Chart(marketCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['Market Share', 'Brand Strength', 'Customer Satisfaction', 'Product Quality', 'Marketing Effectiveness'],
+                        datasets: companies.map((company, index) => ({
+                            label: company,
+                            data: generateRandomData(5, 30, 90),
+                            backgroundColor: colors[index % colors.length].replace('0.7', '0.2'),
+                            borderColor: colors[index % colors.length],
+                            pointBackgroundColor: colors[index % colors.length],
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: colors[index % colors.length]
+                        }))
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Market Performance Metrics'
+                            },
+                        },
+                        scales: {
+                            r: {
+                                angleLines: {
+                                    display: true
+                                },
+                                suggestedMin: 0,
+                                suggestedMax: 100
+                            }
+                        }
+                    }
+                });
+                
+                // Innovation Chart
+                const innovationCtx = document.getElementById('innovationChart').getContext('2d');
+                new Chart(innovationCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: companies,
+                        datasets: [
+                            {
+                                label: 'R&D Investment',
+                                data: rankings.map(r => Math.random() * 100 + 50),
+                                backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                            },
+                            {
+                                label: 'Innovation Index',
+                                data: rankings.map(r => Math.random() * 50 + 30),
+                                backgroundColor: 'rgba(255, 206, 86, 0.7)',
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Innovation Metrics'
+                            },
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Score'
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // Sustainability Chart
+                const sustainabilityCtx = document.getElementById('sustainabilityChart').getContext('2d');
+                new Chart(sustainabilityCtx, {
+                    type: 'polarArea',
+                    data: {
+                        labels: companies,
+                        datasets: [
+                            {
+                                data: rankings.map(r => Math.random() * 50 + 30),
+                                backgroundColor: colors.slice(0, companies.length),
+                                borderColor: colors.slice(0, companies.length).map(c => c.replace('0.7', '1')),
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Sustainability Score'
+                            },
+                            legend: {
+                                position: 'right',
+                            }
+                        },
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 100
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Helper function to generate random data for charts
+            function generateRandomData(count, min, max) {
+                return Array.from({length: count}, () => Math.floor(Math.random() * (max - min + 1)) + min);
+            }
+        });
+    </script>
+</body>
+</html>

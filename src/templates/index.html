@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StrategyMasters: The Smartphone Industry Challenge</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h1 class="text-center">StrategyMasters</h1>
+                        <h3 class="text-center">The Smartphone Industry Challenge</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <p class="lead">A multiplayer business strategy simulation for MBA lectures</p>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-success text-white">
+                                        <h4>Facilitator</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <p>Create a new game session or manage an existing one</p>
+                                        <button class="btn btn-success w-100 mb-2" data-bs-toggle="modal" data-bs-target="#createGameModal">Create New Game</button>
+                                        <button class="btn btn-outline-success w-100" data-bs-toggle="modal" data-bs-target="#joinAdminModal">Join as Facilitator</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-info text-white">
+                                        <h4>Team</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <p>Join an existing game as a team</p>
+                                        <button class="btn btn-info w-100" data-bs-toggle="modal" data-bs-target="#joinTeamModal">Join as Team</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-header bg-secondary text-white">
+                                <h4>About the Simulation</h4>
+                            </div>
+                            <div class="card-body">
+                                <p>StrategyMasters: The Smartphone Industry Challenge is a multiplayer business strategy simulation designed for MBA lectures. Teams compete as smartphone manufacturers in a dynamic market, making strategic decisions over 10 rounds to maximize their company's performance.</p>
+                                
+                                <h5>Key Features:</h5>
+                                <ul>
+                                    <li>Realistic smartphone industry simulation</li>
+                                    <li>Support for up to 5 competing teams</li>
+                                    <li>10 rounds of strategic decision-making</li>
+                                    <li>Balanced scorecard performance evaluation</li>
+                                    <li>Dynamic market conditions and strategic events</li>
+                                    <li>Application of core strategic frameworks</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Game Modal -->
+    <div class="modal fade" id="createGameModal" tabindex="-1" aria-labelledby="createGameModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="createGameModalLabel">Create New Game</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createGameForm">
+                        <div class="mb-3">
+                            <label for="numTeams" class="form-label">Number of Teams</label>
+                            <select class="form-select" id="numTeams" required>
+                                <option value="2">2 Teams</option>
+                                <option value="3">3 Teams</option>
+                                <option value="4">4 Teams</option>
+                                <option value="5" selected>5 Teams</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="numRounds" class="form-label">Number of Rounds</label>
+                            <select class="form-select" id="numRounds" required>
+                                <option value="5">5 Rounds</option>
+                                <option value="8">8 Rounds</option>
+                                <option value="10" selected>10 Rounds</option>
+                                <option value="12">12 Rounds</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Create Game</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Join as Admin Modal -->
+    <div class="modal fade" id="joinAdminModal" tabindex="-1" aria-labelledby="joinAdminModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="joinAdminModalLabel">Join as Facilitator</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="joinAdminForm">
+                        <div class="mb-3">
+                            <label for="adminGameId" class="form-label">Game ID</label>
+                            <input type="text" class="form-control" id="adminGameId" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="adminCode" class="form-label">Admin Code</label>
+                            <input type="text" class="form-control" id="adminCode" required>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Join Game</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Join as Team Modal -->
+    <div class="modal fade" id="joinTeamModal" tabindex="-1" aria-labelledby="joinTeamModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title" id="joinTeamModalLabel">Join as Team</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="joinTeamForm">
+                        <div class="mb-3">
+                            <label for="teamGameId" class="form-label">Game ID</label>
+                            <input type="text" class="form-control" id="teamGameId" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="teamId" class="form-label">Team ID</label>
+                            <input type="text" class="form-control" id="teamId" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="teamCode" class="form-label">Team Code</label>
+                            <input type="text" class="form-control" id="teamCode" required>
+                        </div>
+                        <button type="submit" class="btn btn-info w-100">Join Game</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Created Success Modal -->
+    <div class="modal fade" id="gameCreatedModal" tabindex="-1" aria-labelledby="gameCreatedModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="gameCreatedModalLabel">Game Created Successfully</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <strong>Important:</strong> Save this information! You'll need these codes to access the game.
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Game ID:</strong></label>
+                        <input type="text" class="form-control" id="createdGameId" readonly>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Admin Code:</strong></label>
+                        <input type="text" class="form-control" id="createdAdminCode" readonly>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Team Codes:</strong></label>
+                        <div id="teamCodesList" class="list-group"></div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary" id="goToAdminDashboard">Go to Admin Dashboard</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create Game Form Submission
+            document.getElementById('createGameForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const numTeams = document.getElementById('numTeams').value;
+                const numRounds = document.getElementById('numRounds').value;
+                
+                fetch('/create_game', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        num_teams: parseInt(numTeams),
+                        num_rounds: parseInt(numRounds)
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Hide create game modal
+                    const createModal = bootstrap.Modal.getInstance(document.getElementById('createGameModal'));
+                    createModal.hide();
+                    
+                    // Populate success modal
+                    document.getElementById('createdGameId').value = data.game_id;
+                    document.getElementById('createdAdminCode').value = data.admin_code;
+                    
+                    const teamCodesList = document.getElementById('teamCodesList');
+                    teamCodesList.innerHTML = '';
+                    
+                    for (const [teamId, code] of Object.entries(data.team_codes)) {
+                        const listItem = document.createElement('div');
+                        listItem.className = 'list-group-item';
+                        listItem.innerHTML = `<strong>${teamId}:</strong> ${code}`;
+                        teamCodesList.appendChild(listItem);
+                    }
+                    
+                    // Set up admin dashboard button
+                    document.getElementById('goToAdminDashboard').onclick = function() {
+                        window.location.href = `/admin/${data.game_id}?admin_code=${data.admin_code}`;
+                    };
+                    
+                    // Show success modal
+                    const successModal = new bootstrap.Modal(document.getElementById('gameCreatedModal'));
+                    successModal.show();
+                })
+                .catch(error => {
+                    console.error('Error creating game:', error);
+                    alert('Error creating game. Please try again.');
+                });
+            });
+            
+            // Join Admin Form Submission
+            document.getElementById('joinAdminForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const gameId = document.getElementById('adminGameId').value;
+                const adminCode = document.getElementById('adminCode').value;
+                
+                window.location.href = `/admin/${gameId}?admin_code=${adminCode}`;
+            });
+            
+            // Join Team Form Submission
+            document.getElementById('joinTeamForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const gameId = document.getElementById('teamGameId').value;
+                const teamId = document.getElementById('teamId').value;
+                const teamCode = document.getElementById('teamCode').value;
+                
+                window.location.href = `/team/${gameId}/${teamId}?team_code=${teamCode}`;
+            });
+        });
+    </script>
+</body>
+</html>

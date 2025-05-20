@@ -1,0 +1,1 @@
+Flask==2.2.3\ngunicorn==20.1.0\nWerkzeug==2.2.3\nJinja2==3.1.2\nitsdangerous==2.1.2\nMarkupSafe==2.1.2\npython-dotenv==1.0.0

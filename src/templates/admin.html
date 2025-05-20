@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - StrategyMasters</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container-fluid dashboard-container">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h1>StrategyMasters: The Smartphone Industry Challenge</h1>
+                <h3>Facilitator Dashboard</h3>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="alert alert-primary" id="roundDisplay">
+                    Round 1 of 10
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h4>Game Control</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <button id="startRoundBtn" class="btn btn-success btn-lg w-100">Waiting for All Teams</button>
+                            </div>
+                            <div class="col-md-6">
+                                <button id="forceAdvanceBtn" class="btn btn-warning btn-lg w-100">Force Advance Round</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <ul class="nav nav-tabs" id="mainTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="teams-tab" data-bs-toggle="tab" data-bs-target="#teams" type="button" role="tab" aria-controls="teams" aria-selected="true">Teams</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="market-tab" data-bs-toggle="tab" data-bs-target="#market" type="button" role="tab" aria-controls="market" aria-selected="false">Market Overview</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="events-tab" data-bs-toggle="tab" data-bs-target="#events" type="button" role="tab" aria-controls="events" aria-selected="false">Events</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="rankings-tab" data-bs-toggle="tab" data-bs-target="#rankings" type="button" role="tab" aria-controls="rankings" aria-selected="false">Rankings</button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="mainTabsContent">
+                    <!-- Teams Tab -->
+                    <div class="tab-pane fade show active" id="teams" role="tabpanel" aria-labelledby="teams-tab">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4>Team Status</h4>
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-hover" id="teamsTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Team ID</th>
+                                                <th>Company Name</th>
+                                                <th>Capital</th>
+                                                <th>Market Share</th>
+                                                <th>Score</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="teamsTableBody">
+                                            <tr>
+                                                <td colspan="6" class="text-center">Loading team data...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Market Overview Tab -->
+                    <div class="tab-pane fade" id="market" role="tabpanel" aria-labelledby="market-tab">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4>Market Statistics</h4>
+                                <div class="row">
+                                    <div class="col-md-3 col-sm-6">
+                                        <div class="stat-card">
+                                            <div class="stat-value" id="marketSizeValue">10M units</div>
+                                            <div class="stat-label">Market Size</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-sm-6">
+                                        <div class="stat-card">
+                                            <div class="stat-value" id="marketGrowthValue">5.0%</div>
+                                            <div class="stat-label">Growth Rate</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 col-sm-4">
+                                        <div class="stat-card">
+                                            <div class="stat-value" id="premiumSizeValue">20.0%</div>
+                                            <div class="stat-label">Premium</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 col-sm-4">
+                                        <div class="stat-card">
+                                            <div class="stat-value" id="mid_rangeSizeValue">50.0%</div>
+                                            <div class="stat-label">Mid-Range</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 col-sm-4">
+                                        <div class="stat-card">
+                                            <div class="stat-value" id="budgetSizeValue">30.0%</div>
+                                            <div class="stat-label">Budget</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <h4 class="mt-4">Market Insights</h4>
+                                <div class="market-report">
+                                    <ul class="list-group" id="marketInsights">
+                                        <li class="list-group-item">Loading market insights...</li>
+                                    </ul>
+                                </div>
+                                
+                                <h4 class="mt-4">Market Visualization</h4>
+                                <div class="chart-container">
+                                    <canvas id="marketShareChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Events Tab -->
+                    <div class="tab-pane fade" id="events" role="tabpanel" aria-labelledby="events-tab">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4>Current Round Events</h4>
+                                <div id="eventsList">
+                                    <div class="alert alert-info">No events for this round.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Rankings Tab -->
+                    <div class="tab-pane fade" id="rankings" role="tabpanel" aria-labelledby="rankings-tab">
+                        <div class="card">
+                            <div class="card-body">
+                                <h4>Current Rankings</h4>
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Rank</th>
+                                                <th>Company</th>
+                                                <th>Total Score</th>
+                                                <th>Financial</th>
+                                                <th>Market</th>
+                                                <th>Innovation</th>
+                                                <th>Sustainability</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="rankingsTableBody">
+                                            <tr>
+                                                <td colspan="7" class="text-center">Loading rankings...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <h4 class="mt-4">Score Visualization</h4>
+                                <div class="chart-container">
+                                    <canvas id="scoreChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h4>Facilitator Notes</h4>
+                    </div>
+                    <div class="card-body">
+                        <h5>Game Management</h5>
+                        <ul>
+                            <li>Use the "Start Next Round" button to advance the game when all teams have submitted decisions</li>
+                            <li>Use "Force Advance Round" only when necessary (e.g., if a team is unresponsive)</li>
+                            <li>Monitor team submissions and provide assistance as needed</li>
+                        </ul>
+                        
+                        <h5>Learning Objectives</h5>
+                        <ul>
+                            <li>Strategic Analysis: Teams should apply frameworks like Porter's Five Forces and SWOT</li>
+                            <li>Competitive Positioning: Teams should develop clear strategic positioning</li>
+                            <li>Resource Allocation: Teams should make trade-offs in resource allocation</li>
+                            <li>Market Adaptation: Teams should respond to changing market conditions</li>
+                            <li>Long-term Planning: Teams should balance short-term results with long-term sustainability</li>
+                        </ul>
+                        
+                        <h5>Debrief Questions</h5>
+                        <ul>
+                            <li>What strategic frameworks did your team find most useful?</li>
+                            <li>How did your strategic positioning evolve over the course of the game?</li>
+                            <li>What were your most successful decisions? What would you do differently?</li>
+                            <li>How did you respond to strategic events and market changes?</li>
+                            <li>What connections can you draw between this simulation and real-world strategic management?</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/game-engine.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+</body>
+</html>
