@@ -67,7 +67,8 @@ class GameEngine {
             
             const data = await response.json();
             this.gameState = data;
-            this.currentRound = data.round;
+            // Support both team and admin responses
+            this.currentRound = data.current_round || data.round;
             this.totalRounds = data.total_rounds;
             this.isFinished = data.finished || false;
             
@@ -326,9 +327,16 @@ class GameEngine {
         }
         
         // Check if team has already submitted for this round
+        // Determine if this team has already submitted decisions for the
+        // current round. The backend may provide a `submitted` flag or the
+        // round results. Check both for robustness.
         const currentRoundStr = this.currentRound.toString();
-        const submissions = this.gameState.previous_results?.submissions || [];
-        this.hasSubmitted = submissions.includes(this.id);
+        if (typeof this.gameState.submitted !== 'undefined') {
+            this.hasSubmitted = this.gameState.submitted;
+        } else {
+            const submissions = this.gameState.round_results?.[currentRoundStr]?.submissions || [];
+            this.hasSubmitted = submissions.includes(this.id);
+        }
         
         const submitBtn = document.getElementById('submitDecisionsBtn');
         if (this.hasSubmitted) {
@@ -596,8 +604,9 @@ class GameEngine {
             const result = await response.json();
             
             if (result.success) {
-                // Show success message
-                this.showSuccess(`Advanced to round ${result.current_round}`);
+                // Show success message using returned round number
+                const newRound = result.current_round || result.round;
+                this.showSuccess(`Advanced to round ${newRound}`);
                 
                 // Refresh game state
                 await this.fetchGameState();
@@ -642,8 +651,9 @@ class GameEngine {
             const result = await response.json();
             
             if (result.success) {
-                // Show success message
-                this.showSuccess(`Forced advance to round ${result.current_round}`);
+                // Show success message with returned round number
+                const newRound = result.current_round || result.round;
+                this.showSuccess(`Forced advance to round ${newRound}`);
                 
                 // Refresh game state
                 await this.fetchGameState();
