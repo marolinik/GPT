@@ -180,7 +180,13 @@ class GameState:
                 "company_state": self.round_results[prev_round]["company_states"].get(team_id),
                 "market_results": self.round_results[prev_round]["market_results"].get(team_id)
             }
-        
+
+        # Determine if this team has submitted decisions for the current round
+        submitted = False
+        current_round_key = str(self.current_round)
+        if current_round_key in self.round_results:
+            submitted = team_id in self.round_results[current_round_key].get("submissions", [])
+
         return {
             "round": self.current_round,
             "total_rounds": self.num_rounds,
@@ -188,7 +194,9 @@ class GameState:
             "market": market_info,
             "events": current_events,
             "competitors": competitors,
-            "previous_results": previous_results
+            "previous_results": previous_results,
+            "submitted": submitted,
+            "finished": self.finished
         }
         
     def get_admin_view(self):
