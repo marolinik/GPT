@@ -19,8 +19,8 @@ The simulation supports up to 5 competing teams and runs for 10 rounds, with eac
 
 1. **Installation**:
    - Ensure you have Python 3.8+ installed
-   - Install required packages: `pip install flask`
-   - Navigate to the application directory: `cd strategy_game/app`
+   - Install required packages: `pip install -r requirements.txt`
+   - Navigate to the application directory: `cd src`
    - Start the server: `python main.py`
    - Access the application at: `http://localhost:5000`
 
