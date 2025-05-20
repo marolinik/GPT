@@ -258,7 +258,33 @@
                 const gameId = document.getElementById('adminGameId').value;
                 const adminCode = document.getElementById('adminCode').value;
                 
-                window.location.href = `/admin/${gameId}?admin_code=${adminCode}`;
+                fetch('/join_game', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        game_id: gameId,
+                        role: 'admin',
+                        code: adminCode
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    } else {
+                        throw new Error('No redirect URL received');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error joining game:', error);
+                    alert('Error joining game: ' + error.message);
+                });
             });
             
             // Join Team Form Submission
@@ -269,7 +295,33 @@
                 const teamId = document.getElementById('teamId').value;
                 const teamCode = document.getElementById('teamCode').value;
                 
-                window.location.href = `/team/${gameId}/${teamId}?team_code=${teamCode}`;
+                fetch('/join_game', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        game_id: gameId,
+                        role: 'team',
+                        code: teamCode
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                    } else {
+                        throw new Error('No redirect URL received');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error joining game:', error);
+                    alert('Error joining game: ' + error.message);
+                });
             });
         });
     </script>

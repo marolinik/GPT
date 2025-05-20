@@ -5,6 +5,19 @@ Defines strategic events that impact the game and market conditions
 
 import random
 
+# --- Event Generation Constants ---
+LATE_GAME_EVENT_ROUND_THRESHOLD = 5
+EVENT_ID_RANDOM_SUFFIX_MIN = 1000
+EVENT_ID_RANDOM_SUFFIX_MAX = 9999
+
+# --- Attribute constants (mirroring general game attribute scales) ---
+# These are for clarity in clamping values within apply_impact if needed,
+# though direct use of 0, 100, 1.0 is often clear for percentages/shares.
+DEFAULT_ATTRIBUTE_MIN = 0.0
+DEFAULT_ATTRIBUTE_MAX = 100.0
+MARKET_SHARE_MAX = 1.0 
+# For market trends/factors, bounds are applied in apply_impact based on constants from market.py logic (e.g. 0.1-0.9 or 0.1-1.0)
+
 class Event:
     def __init__(self, event_id, title, description, round, impact_areas, impact_values):
         """Initialize a new strategic event"""
@@ -18,58 +31,72 @@ class Event:
     def apply_impact(self, game_state):
         """Apply the event's impact to the game state"""
         # Impact on market
-        if "market" in self.impact_areas:
-            market_impacts = self.impact_areas["market"]
-            for area, impact in market_impacts.items():
+        if "market" in self.impact_values:  # Iterate based on impact_values
+            market_value_impacts = self.impact_values["market"]
+            for area, impact_value in market_value_impacts.items():
                 if area == "total_market_size":
-                    game_state.market.total_market_size *= (1 + self.impact_values["market"][area])
+                    game_state.market.total_market_size *= (1 + impact_value)
                 elif area == "market_growth_rate":
-                    game_state.market.market_growth_rate += self.impact_values["market"][area]
+                    game_state.market.market_growth_rate += impact_value
                 elif area.startswith("segment_"):
-                    segment = area.split("_")[1]
-                    if segment in game_state.market.segments:
-                        game_state.market.segments[segment]["size"] *= (1 + self.impact_values["market"][area])
+                    segment_key_part = area.split("_", 1)[1] # e.g., "budget" or "premium_size"
+                    # Need to handle if segment_key_part is just segment name or attribute like size
+                    # Current event definitions like "segment_budget" imply changing segment size.
+                    if game_state.market.segments.get(segment_key_part):
+                         game_state.market.segments[segment_key_part]["size"] *= (1 + impact_value)
+                    # Example if events were defined as "segment_premium_price_sensitivity"
+                    # elif "_" in segment_key_part:
+                    #    segment_name, segment_attr = segment_key_part.split("_", 1)
+                    #    if game_state.market.segments.get(segment_name):
+                    #        game_state.market.segments[segment_name][segment_attr] += impact_value 
                 elif area in game_state.market.trends:
-                    game_state.market.trends[area] += self.impact_values["market"][area]
+                    game_state.market.trends[area] = max(0.1, min(0.9, game_state.market.trends[area] + impact_value)) # Add bounds like in market.py
                 elif area in game_state.market.external_factors:
-                    game_state.market.external_factors[area] += self.impact_values["market"][area]
+                    game_state.market.external_factors[area] = max(0.1, min(1.0, game_state.market.external_factors[area] + impact_value)) # Add bounds
         
-        # Normalize segment sizes after changes
-        total_size = sum(segment["size"] for segment in game_state.market.segments.values())
-        for segment in game_state.market.segments.values():
-            segment["size"] /= total_size
+            # Normalize segment sizes after changes, if any segment size was modified
+            # This should be done if any event specifically changed a segment size.
+            if any(area.startswith("segment_") for area in market_value_impacts.keys()):
+                total_size = sum(s["size"] for s in game_state.market.segments.values())
+                if total_size > 0: # Avoid division by zero if all segments somehow become zero
+                    for segment_data in game_state.market.segments.values():
+                        segment_data["size"] /= total_size
+                else: # if total_size is 0, distribute equally or handle as error
+                    num_segments = len(game_state.market.segments)
+                    if num_segments > 0:
+                        equal_share = 1.0 / num_segments
+                        for segment_data in game_state.market.segments.values():
+                            segment_data["size"] = equal_share
             
-        # Impact on companies (all or specific)
-        if "companies" in self.impact_areas:
-            company_impacts = self.impact_areas["companies"]
-            for team_id, company in game_state.teams.items():
-                # Check if this company is affected
-                if "all" in company_impacts or team_id in company_impacts:
-                    impacts = company_impacts.get("all", {})
-                    if team_id in company_impacts:
-                        impacts.update(company_impacts[team_id])
-                        
-                    for area, impact in impacts.items():
-                        impact_value = self.impact_values["companies"].get("all", {}).get(area, 0)
-                        if team_id in self.impact_values.get("companies", {}):
-                            impact_value = self.impact_values["companies"][team_id].get(area, impact_value)
-                            
-                        if area == "capital":
-                            company.capital *= (1 + impact_value)
-                        elif area == "r_d_capability":
-                            company.r_d_capability = max(0, min(100, company.r_d_capability + impact_value))
-                        elif area == "production_capacity":
-                            company.production_capacity *= (1 + impact_value)
-                        elif area == "brand_strength":
-                            company.brand_strength = max(0, min(100, company.brand_strength + impact_value))
-                        elif area == "quality_control":
-                            company.quality_control = max(0, min(100, company.quality_control + impact_value))
-                        elif area == "customer_satisfaction":
-                            company.customer_satisfaction = max(0, min(100, company.customer_satisfaction + impact_value))
-                        elif area == "innovation_index":
-                            company.innovation_index = max(0, min(100, company.innovation_index + impact_value))
-                        elif area == "environmental_impact":
-                            company.environmental_impact = max(0, min(100, company.environmental_impact + impact_value))
+        # Impact on companies
+        if "companies" in self.impact_values:
+            company_impact_definitions = self.impact_values["companies"]
+            
+            for company in game_state.teams.values(): # Iterate through company objects
+                # Determine actual impacts for this company by combining "all" and team-specific if defined
+                actual_impacts_for_company = company_impact_definitions.get("all", {}).copy()
+                team_specific_impacts = company_impact_definitions.get(company.team_id, {})
+                actual_impacts_for_company.update(team_specific_impacts) # Team-specific overrides "all"
+
+                for area, impact_value in actual_impacts_for_company.items():
+                    if area == "capital":
+                        company.capital *= (1 + impact_value)
+                    elif area == "r_d_capability":
+                        company.r_d_capability = max(DEFAULT_ATTRIBUTE_MIN, min(DEFAULT_ATTRIBUTE_MAX, company.r_d_capability + impact_value))
+                    elif area == "production_capacity":
+                        company.production_capacity *= (1 + impact_value) # No specific min/max other than practical limits
+                    elif area == "brand_strength":
+                        company.brand_strength = max(DEFAULT_ATTRIBUTE_MIN, min(DEFAULT_ATTRIBUTE_MAX, company.brand_strength + impact_value))
+                    elif area == "quality_control":
+                        company.quality_control = max(DEFAULT_ATTRIBUTE_MIN, min(DEFAULT_ATTRIBUTE_MAX, company.quality_control + impact_value))
+                    elif area == "customer_satisfaction":
+                        company.customer_satisfaction = max(DEFAULT_ATTRIBUTE_MIN, min(DEFAULT_ATTRIBUTE_MAX, company.customer_satisfaction + impact_value))
+                    elif area == "innovation_index":
+                        company.innovation_index = max(DEFAULT_ATTRIBUTE_MIN, min(DEFAULT_ATTRIBUTE_MAX, company.innovation_index + impact_value))
+                    elif area == "environmental_impact":
+                        company.environmental_impact = max(DEFAULT_ATTRIBUTE_MIN, min(DEFAULT_ATTRIBUTE_MAX, company.environmental_impact + impact_value))
+                    elif area == "market_share": # Added handling for market_share
+                        company.market_share = max(DEFAULT_ATTRIBUTE_MIN, min(MARKET_SHARE_MAX, company.market_share + impact_value))
                             
     def to_dict(self):
         """Convert event to dictionary for serialization"""
@@ -259,14 +286,14 @@ class Event:
         ]
         
         # Add late-game events if appropriate
-        if round_number > 5:
+        if round_number > LATE_GAME_EVENT_ROUND_THRESHOLD:
             events.extend(late_game_events)
             
         # Select a random event
         event_template = random.choice(events)
         
         # Create unique ID
-        event_id = f"event_{round_number}_{random.randint(1000, 9999)}"
+        event_id = f"event_{round_number}_{random.randint(EVENT_ID_RANDOM_SUFFIX_MIN, EVENT_ID_RANDOM_SUFFIX_MAX)}"
         
         return cls(
             event_id=event_id,

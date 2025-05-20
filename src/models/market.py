@@ -5,108 +5,168 @@ Simulates market dynamics, consumer behavior, and competitive interactions
 
 import random
 import math
+import copy
+
+# --- Initial Market Defaults ---
+INITIAL_TOTAL_MARKET_SIZE = 10000000.0  # Units per quarter
+INITIAL_MARKET_GROWTH_RATE = 0.05  # Annual growth rate (5%)
+
+# --- Market Segments Configuration ---
+# This will be deep-copied for the instance's segments attribute
+DEFAULT_SEGMENTS_CONFIG = {
+    "premium": {
+        "size": 0.2, "price_sensitivity": 0.3, "quality_importance": 0.8,
+        "feature_importance": 0.9, "brand_importance": 0.7,
+        "avg_price": 999.0, "price_range": [699.0, 1499.0]
+    },
+    "mid_range": {
+        "size": 0.5, "price_sensitivity": 0.6, "quality_importance": 0.6,
+        "feature_importance": 0.6, "brand_importance": 0.5,
+        "avg_price": 499.0, "price_range": [299.0, 699.0]
+    },
+    "budget": {
+        "size": 0.3, "price_sensitivity": 0.9, "quality_importance": 0.4,
+        "feature_importance": 0.3, "brand_importance": 0.3,
+        "avg_price": 199.0, "price_range": [99.0, 299.0]
+    }
+}
+
+# --- Market Trends Initial Values ---
+INITIAL_TRENDS = {
+    "camera_importance": 0.5, "battery_importance": 0.6,
+    "processor_importance": 0.7, "display_importance": 0.5,
+    "software_importance": 0.6, "sustainability_importance": 0.4,
+    "innovation_preference": 0.5
+}
+
+# --- External Factors Initial Values ---
+INITIAL_EXTERNAL_FACTORS = {
+    "economic_strength": 0.7, "technology_advancement": 0.5,
+    "competitive_intensity": 0.6, "regulatory_pressure": 0.4
+}
+
+# --- Market Update Dynamics ---
+QUARTERLY_GROWTH_DIVISOR = 4.0 # For converting annual to quarterly growth
+MID_GAME_SHIFT_ROUND = 5
+LATE_GAME_SHIFT_ROUND = 8
+PREMIUM_SEGMENT_GROWTH_MID_GAME = 0.01
+MID_RANGE_SEGMENT_SHRINK_MID_GAME = 0.005 # Negative value means shrink
+BUDGET_SEGMENT_SHRINK_MID_GAME = 0.005    # Negative value means shrink
+INNOVATION_PREFERENCE_BOOST_LATE_GAME = 0.1
+SUSTAINABILITY_IMPORTANCE_BOOST_LATE_GAME = 0.1
+
+ECONOMIC_STRENGTH_CHANGE_MIN = -0.1
+ECONOMIC_STRENGTH_CHANGE_MAX = 0.1
+ECONOMIC_STRENGTH_MIN_BOUND = 0.1
+ECONOMIC_STRENGTH_MAX_BOUND = 1.0
+
+TECH_ADVANCEMENT_PER_ROUND = 0.05
+TECH_ADVANCEMENT_MAX_BOUND = 1.0
+
+COMPETITIVE_INTENSITY_CHANGE_MIN = -0.05
+COMPETITIVE_INTENSITY_CHANGE_MAX = 0.15
+COMPETITIVE_INTENSITY_MIN_BOUND = 0.3
+COMPETITIVE_INTENSITY_MAX_BOUND = 1.0
+
+TREND_VALUE_CHANGE_MIN = -0.05
+TREND_VALUE_CHANGE_MAX = 0.05
+TREND_VALUE_MIN_BOUND = 0.1
+TREND_VALUE_MAX_BOUND = 0.9
+
+# --- Market Results Calculation Factors ---
+ATTRIBUTE_NORMALIZATION_DIVISOR = 100.0 # For quality, features, brand (0-100 scale)
+MARKETING_EFFECTIVENESS_BUDGET_CAP = 50000000.0 # Budget for max marketing effectiveness
+
+# Attractiveness Score Weights
+ATTR_WEIGHT_PRICE = 0.3
+ATTR_WEIGHT_QUALITY = 0.25
+ATTR_WEIGHT_FEATURES = 0.20
+ATTR_WEIGHT_BRAND = 0.15
+ATTR_WEIGHT_MARKETING = 0.10
+ATTR_WEIGHT_INNOVATION = 0.05
+ATTR_WEIGHT_SUSTAINABILITY = 0.05
+
+# Customer Satisfaction Change Factors
+CUST_SAT_PRICE_FACTOR = 3.0
+CUST_SAT_QUALITY_FACTOR = 5.0
+CUST_SAT_SUPPLY_FACTOR = 2.0
+CUST_SAT_TOTAL_DIVISOR = 10.0
+CUST_SAT_OVERALL_SCALE_FACTOR = 5.0
+
+# --- Market Insights Thresholds ---
+INSIGHT_ECON_STRONG_THRESHOLD = 0.7
+INSIGHT_ECON_WEAK_THRESHOLD = 0.4
+INSIGHT_TECH_ADV_STRONG_THRESHOLD = 0.7
+INSIGHT_COMPETITION_HIGH_THRESHOLD = 0.8
+INSIGHT_ROUND_EARLY_GAME = 1
+INSIGHT_ROUND_MID_GAME_CONSOLIDATION = 5
+INSIGHT_ROUND_LATE_GAME_MATURITY = 8
 
 class Market:
     def __init__(self):
         """Initialize the market simulation"""
         self.current_round = 0
-        self.total_market_size = 10000000  # 10 million units per quarter
-        self.market_growth_rate = 0.05  # 5% annual growth
+        self.total_market_size = float(INITIAL_TOTAL_MARKET_SIZE)
+        self.market_growth_rate = float(INITIAL_MARKET_GROWTH_RATE)
         
-        # Market segments
-        self.segments = {
-            "premium": {
-                "size": 0.2,  # 20% of total market
-                "price_sensitivity": 0.3,  # Low price sensitivity (0-1)
-                "quality_importance": 0.8,  # High quality importance (0-1)
-                "feature_importance": 0.9,  # High feature importance (0-1)
-                "brand_importance": 0.7,  # High brand importance (0-1)
-                "avg_price": 999,  # Average price point
-                "price_range": [699, 1499]  # Min-max price range
-            },
-            "mid_range": {
-                "size": 0.5,  # 50% of total market
-                "price_sensitivity": 0.6,  # Medium price sensitivity
-                "quality_importance": 0.6,  # Medium quality importance
-                "feature_importance": 0.6,  # Medium feature importance
-                "brand_importance": 0.5,  # Medium brand importance
-                "avg_price": 499,  # Average price point
-                "price_range": [299, 699]  # Min-max price range
-            },
-            "budget": {
-                "size": 0.3,  # 30% of total market
-                "price_sensitivity": 0.9,  # High price sensitivity
-                "quality_importance": 0.4,  # Low quality importance
-                "feature_importance": 0.3,  # Low feature importance
-                "brand_importance": 0.3,  # Low brand importance
-                "avg_price": 199,  # Average price point
-                "price_range": [99, 299]  # Min-max price range
-            }
-        }
+        # Market segments - deep copy to ensure instance has its own mutable dicts
+        self.segments = copy.deepcopy(DEFAULT_SEGMENTS_CONFIG)
         
-        # Market trends
-        self.trends = {
-            "camera_importance": 0.5,
-            "battery_importance": 0.6,
-            "processor_importance": 0.7,
-            "display_importance": 0.5,
-            "software_importance": 0.6,
-            "sustainability_importance": 0.4,
-            "innovation_preference": 0.5
-        }
+        # Market trends - copy the dictionary
+        self.trends = INITIAL_TRENDS.copy()
         
-        # External factors
-        self.external_factors = {
-            "economic_strength": 0.7,  # 0-1, higher is stronger economy
-            "technology_advancement": 0.5,  # 0-1, higher is faster advancement
-            "competitive_intensity": 0.6,  # 0-1, higher is more intense
-            "regulatory_pressure": 0.4  # 0-1, higher is more regulation
-        }
+        # External factors - copy the dictionary
+        self.external_factors = INITIAL_EXTERNAL_FACTORS.copy()
         
     def update_market_conditions(self, round_number):
         """Update market conditions for the current round"""
         self.current_round = round_number
         
         # Update market size with growth
-        growth_factor = 1 + (self.market_growth_rate / 4)  # Quarterly growth
+        growth_factor = 1.0 + (self.market_growth_rate / QUARTERLY_GROWTH_DIVISOR)  # Quarterly growth
         self.total_market_size *= growth_factor
         
         # Adjust segment sizes based on trends and round progression
-        if round_number > 5:  # Mid-game shift
-            # Premium segment grows slightly
-            self.segments["premium"]["size"] += 0.01
-            self.segments["mid_range"]["size"] -= 0.005
-            self.segments["budget"]["size"] -= 0.005
+        if round_number > MID_GAME_SHIFT_ROUND:  # Mid-game shift
+            self.segments["premium"]["size"] += PREMIUM_SEGMENT_GROWTH_MID_GAME
+            self.segments["mid_range"]["size"] -= MID_RANGE_SEGMENT_SHRINK_MID_GAME # Effectively adding a negative
+            self.segments["budget"]["size"] -= BUDGET_SEGMENT_SHRINK_MID_GAME    # Effectively adding a negative
             
-        if round_number > 8:  # Late-game shift
-            # Innovation becomes more important
-            self.trends["innovation_preference"] += 0.1
-            self.trends["sustainability_importance"] += 0.1
+        if round_number > LATE_GAME_SHIFT_ROUND:  # Late-game shift
+            self.trends["innovation_preference"] = min(TREND_VALUE_MAX_BOUND, self.trends["innovation_preference"] + INNOVATION_PREFERENCE_BOOST_LATE_GAME)
+            self.trends["sustainability_importance"] = min(TREND_VALUE_MAX_BOUND, self.trends["sustainability_importance"] + SUSTAINABILITY_IMPORTANCE_BOOST_LATE_GAME)
             
         # Normalize segment sizes to ensure they sum to 1
-        total_size = sum(segment["size"] for segment in self.segments.values())
-        for segment in self.segments.values():
-            segment["size"] /= total_size
+        current_total_segment_size = sum(segment["size"] for segment in self.segments.values())
+        if current_total_segment_size > 0: # Avoid division by zero
+            for segment_data in self.segments.values(): # Renamed segment to segment_data
+                segment_data["size"] /= current_total_segment_size
+        else: # Fallback: if all segments are zero somehow, reset to defaults (or handle error)
+            # This case should ideally not be reached if initial sizes are non-zero and changes are small.
+            # For robustness, one might re-initialize to default proportions.
+            # For now, if this happens, they remain 0 or whatever they were.
+            pass 
             
         # Update external factors
         # Economic cycles
-        economic_change = random.uniform(-0.1, 0.1)
-        self.external_factors["economic_strength"] = max(0.1, min(1.0, 
+        economic_change = random.uniform(ECONOMIC_STRENGTH_CHANGE_MIN, ECONOMIC_STRENGTH_CHANGE_MAX)
+        self.external_factors["economic_strength"] = max(ECONOMIC_STRENGTH_MIN_BOUND, min(ECONOMIC_STRENGTH_MAX_BOUND, 
                                                        self.external_factors["economic_strength"] + economic_change))
         
         # Technology advancement increases over time
-        self.external_factors["technology_advancement"] = min(1.0, 
-                                                           self.external_factors["technology_advancement"] + 0.05)
+        self.external_factors["technology_advancement"] = min(TECH_ADVANCEMENT_MAX_BOUND, 
+                                                           self.external_factors["technology_advancement"] + TECH_ADVANCEMENT_PER_ROUND)
         
         # Competitive intensity fluctuates
-        competitive_change = random.uniform(-0.05, 0.15)  # Bias toward increasing
-        self.external_factors["competitive_intensity"] = max(0.3, min(1.0, 
+        competitive_change = random.uniform(COMPETITIVE_INTENSITY_CHANGE_MIN, COMPETITIVE_INTENSITY_CHANGE_MAX)
+        self.external_factors["competitive_intensity"] = max(COMPETITIVE_INTENSITY_MIN_BOUND, min(COMPETITIVE_INTENSITY_MAX_BOUND, 
                                                           self.external_factors["competitive_intensity"] + competitive_change))
         
-        # Random trend shifts
-        for trend in self.trends:
-            change = random.uniform(-0.05, 0.05)
-            self.trends[trend] = max(0.1, min(0.9, self.trends[trend] + change))
+        # Random trend shifts (for trends not specifically boosted by late game stage)
+        for trend_key in self.trends: # Renamed trend to trend_key
+            if not (round_number > LATE_GAME_SHIFT_ROUND and trend_key in ["innovation_preference", "sustainability_importance"]):
+                change = random.uniform(TREND_VALUE_CHANGE_MIN, TREND_VALUE_CHANGE_MAX)
+                self.trends[trend_key] = max(TREND_VALUE_MIN_BOUND, min(TREND_VALUE_MAX_BOUND, self.trends[trend_key] + change))
             
     def calculate_market_results(self, companies):
         """Calculate market results based on company decisions"""
@@ -114,132 +174,121 @@ class Market:
         
         # Calculate segment sizes in units
         segment_units = {
-            segment: int(self.total_market_size * self.segments[segment]["size"])
-            for segment in self.segments
+            segment_name: int(self.total_market_size * segment_info["size"])
+            for segment_name, segment_info in self.segments.items()
         }
         
         # For each segment, calculate market share and sales for each company
-        for segment, segment_info in self.segments.items():
-            # Collect all companies competing in this segment
+        for segment_name, segment_info in self.segments.items(): # Renamed segment to segment_name
             competing_companies = {}
             for team_id, company in companies.items():
-                if (segment in company.products and 
-                    company.products[segment]["active"] and 
-                    company.products[segment]["production_volume"] > 0):
+                if (segment_name in company.products and 
+                    company.products[segment_name]["active"] and 
+                    company.products[segment_name]["production_volume"] > 0):
                     competing_companies[team_id] = company
             
-            # If no companies in this segment, continue
             if not competing_companies:
                 continue
                 
-            # Calculate attractiveness score for each company in this segment
             attractiveness_scores = {}
-            total_attractiveness = 0
+            total_attractiveness = 0.0
             
             for team_id, company in competing_companies.items():
-                product = company.products[segment]
+                product = company.products[segment_name]
                 
-                # Price attractiveness (inverse relationship)
-                price = product["price"]
-                price_range = segment_info["price_range"]
-                price_position = (price_range[1] - price) / (price_range[1] - price_range[0])
-                price_position = max(0, min(1, price_position))  # Clamp between 0-1
-                price_score = price_position ** segment_info["price_sensitivity"]
+                price = float(product["price"])
+                price_range_min = float(segment_info["price_range"][0])
+                price_range_max = float(segment_info["price_range"][1])
+                # Price position: 1.0 if price is at min_range, 0.0 if at max_range
+                price_denominator = price_range_max - price_range_min
+                price_position = (price_range_max - price) / price_denominator if price_denominator > 0 else 0.5 # Avoid div by zero, default to mid if range is zero
+                price_position = max(0.0, min(1.0, price_position))
+                price_score = price_position ** float(segment_info["price_sensitivity"]) # price_sensitivity is 0-1
                 
-                # Quality attractiveness
-                quality = product["quality"]
-                quality_score = (quality / 100) ** segment_info["quality_importance"]
+                quality = float(product["quality"])
+                quality_score = (quality / ATTRIBUTE_NORMALIZATION_DIVISOR) ** float(segment_info["quality_importance"])
                 
-                # Features attractiveness
-                features = product["features"]
-                feature_score = (features / 100) ** segment_info["feature_importance"]
+                features = float(product["features"])
+                feature_score = (features / ATTRIBUTE_NORMALIZATION_DIVISOR) ** float(segment_info["feature_importance"])
                 
-                # Brand attractiveness
-                brand = company.brand_strength
-                brand_score = (brand / 100) ** segment_info["brand_importance"]
+                brand = float(company.brand_strength)
+                brand_score = (brand / ATTRIBUTE_NORMALIZATION_DIVISOR) ** float(segment_info["brand_importance"])
                 
-                # Marketing effectiveness
-                marketing_budget = product["marketing_budget"]
-                marketing_effectiveness = min(1, marketing_budget / 50000000)  # $50M for max effect
+                marketing_budget = float(product["marketing_budget"])
+                marketing_effectiveness = min(1.0, marketing_budget / MARKETING_EFFECTIVENESS_BUDGET_CAP)
                 
-                # Innovation bonus
-                innovation_bonus = (company.innovation_index / 100) * self.trends["innovation_preference"]
+                innovation_bonus = (float(company.innovation_index) / ATTRIBUTE_NORMALIZATION_DIVISOR) * float(self.trends["innovation_preference"])
+                sustainability_bonus = (float(company.environmental_impact) / ATTRIBUTE_NORMALIZATION_DIVISOR) * float(self.trends["sustainability_importance"])
                 
-                # Sustainability bonus
-                sustainability_bonus = (company.environmental_impact / 100) * self.trends["sustainability_importance"]
-                
-                # Calculate overall attractiveness
                 attractiveness = (
-                    price_score * 0.3 +
-                    quality_score * 0.25 +
-                    feature_score * 0.2 +
-                    brand_score * 0.15 +
-                    marketing_effectiveness * 0.1 +
-                    innovation_bonus * 0.05 +
-                    sustainability_bonus * 0.05
+                    price_score * ATTR_WEIGHT_PRICE +
+                    quality_score * ATTR_WEIGHT_QUALITY +
+                    feature_score * ATTR_WEIGHT_FEATURES +
+                    brand_score * ATTR_WEIGHT_BRAND +
+                    marketing_effectiveness * ATTR_WEIGHT_MARKETING +
+                    innovation_bonus * ATTR_WEIGHT_INNOVATION +
+                    sustainability_bonus * ATTR_WEIGHT_SUSTAINABILITY
                 )
                 
                 attractiveness_scores[team_id] = attractiveness
                 total_attractiveness += attractiveness
             
-            # Calculate market share for each company in this segment
             market_shares = {}
             if total_attractiveness > 0:
-                for team_id, attractiveness in attractiveness_scores.items():
-                    market_shares[team_id] = attractiveness / total_attractiveness
-            else:
-                # Equal distribution if all have zero attractiveness
+                for team_id, attractiveness_val in attractiveness_scores.items(): # Renamed attractiveness
+                    market_shares[team_id] = attractiveness_val / total_attractiveness
+            elif competing_companies: # Avoid division by zero if total_attractiveness is 0 but companies exist
                 equal_share = 1.0 / len(competing_companies)
                 for team_id in competing_companies:
                     market_shares[team_id] = equal_share
             
-            # Calculate units sold for each company
-            segment_total_units = segment_units[segment]
-            for team_id, market_share in market_shares.items():
+            segment_total_units_available = float(segment_units[segment_name])
+            for team_id, market_share_val in market_shares.items(): # Renamed market_share
                 company = competing_companies[team_id]
-                potential_units = int(segment_total_units * market_share)
+                potential_units = segment_total_units_available * market_share_val
                 
-                # Limited by production capacity
-                actual_units = min(potential_units, company.products[segment]["production_volume"])
+                actual_units_sold = min(potential_units, float(company.products[segment_name]["production_volume"]))
                 
-                # Initialize company results if not exists
                 if team_id not in results:
                     results[team_id] = {
                         "sales": {},
-                        "market_share": 0,
-                        "customer_satisfaction_change": 0
+                        "market_share": 0.0,
+                        "customer_satisfaction_change": 0.0
                     }
                 
-                # Store sales results
-                results[team_id]["sales"][segment] = {
-                    "units_sold": actual_units,
-                    "revenue": actual_units * company.products[segment]["price"],
-                    "market_share": market_share
+                results[team_id]["sales"][segment_name] = {
+                    "units_sold": actual_units_sold,
+                    "revenue": actual_units_sold * float(company.products[segment_name]["price"]),
+                    "market_share": market_share_val # Segment-specific market share
                 }
                 
-                # Calculate customer satisfaction change
-                price_satisfaction = price_score - 0.5  # -0.5 to 0.5
-                quality_satisfaction = quality_score - 0.5  # -0.5 to 0.5
+                price_satisfaction_score = price_score - 0.5  # Range -0.5 to 0.5
+                quality_satisfaction_score = quality_score - 0.5  # Range -0.5 to 0.5
                 
-                # If demand exceeds supply, satisfaction decreases
-                supply_demand_ratio = min(1, company.products[segment]["production_volume"] / potential_units)
-                supply_satisfaction = (supply_demand_ratio - 0.5) * 2  # -1 to 1
+                supply_demand_ratio = min(1.0, float(company.products[segment_name]["production_volume"]) / potential_units) if potential_units > 0 else 1.0 # Avoid div by zero
+                supply_satisfaction_score = (supply_demand_ratio - 0.5) * 2.0  # Range -1.0 to 1.0
                 
-                satisfaction_change = (
-                    price_satisfaction * 3 +
-                    quality_satisfaction * 5 +
-                    supply_satisfaction * 2
-                ) / 10
+                satisfaction_change_for_segment = (
+                    price_satisfaction_score * CUST_SAT_PRICE_FACTOR +
+                    quality_satisfaction_score * CUST_SAT_QUALITY_FACTOR +
+                    supply_satisfaction_score * CUST_SAT_SUPPLY_FACTOR
+                ) / CUST_SAT_TOTAL_DIVISOR
                 
-                results[team_id]["customer_satisfaction_change"] += satisfaction_change * 5  # Scale to -5 to +5
+                results[team_id]["customer_satisfaction_change"] += satisfaction_change_for_segment * CUST_SAT_OVERALL_SCALE_FACTOR
         
-        # Calculate overall market share for each company
-        total_units = sum(segment_units.values())
-        for team_id, company_results in results.items():
-            total_company_units = sum(
-                segment["units_sold"] for segment in company_results["sales"].values()
+        total_market_units_sold_overall = sum(s_info["units_sold"] for r_info in results.values() for s_info in r_info["sales"].values())
+        for team_id, company_results_dict in results.items(): # Renamed company_results
+            total_company_units_sold = sum(
+                segment_sales_info["units_sold"] for segment_sales_info in company_results_dict["sales"].values()
             )
-            company_results["market_share"] = total_company_units / total_units if total_units > 0 else 0
+            # Overall market share for the company across all segments it sold in, relative to total market units for those segments
+            # Or, it could be relative to total_market_size if that's more appropriate.
+            # The original logic was total_company_units / total_units (where total_units was sum of segment_units.values() from market demand)
+            # This seems more accurate to actual sales achieved by the company.
+            if self.total_market_size > 0: # use initial total market size as base
+                 company_results_dict["market_share"] = total_company_units_sold / self.total_market_size
+            else:
+                 company_results_dict["market_share"] = 0.0
         
         return results
     
@@ -249,9 +298,9 @@ class Market:
             "round": round_number,
             "total_market_size": self.total_market_size,
             "market_growth_rate": self.market_growth_rate,
-            "segments": self.segments,
-            "trends": self.trends,
-            "external_factors": self.external_factors,
+            "segments": copy.deepcopy(self.segments), # Return a copy to prevent external modification
+            "trends": self.trends.copy(),
+            "external_factors": self.external_factors.copy(),
             "insights": self._generate_market_insights(round_number)
         }
     
@@ -260,33 +309,35 @@ class Market:
         insights = []
         
         # Economic insights
-        if self.external_factors["economic_strength"] > 0.7:
+        if self.external_factors["economic_strength"] > INSIGHT_ECON_STRONG_THRESHOLD:
             insights.append("Consumer spending is strong, premium segment shows growth potential.")
-        elif self.external_factors["economic_strength"] < 0.4:
+        elif self.external_factors["economic_strength"] < INSIGHT_ECON_WEAK_THRESHOLD:
             insights.append("Economic downturn is affecting consumer spending. Budget segment may see increased demand.")
         
         # Technology insights
-        if self.external_factors["technology_advancement"] > 0.7:
+        if self.external_factors["technology_advancement"] > INSIGHT_TECH_ADV_STRONG_THRESHOLD:
             insights.append("Rapid technological advancement is creating opportunities for innovation.")
         
         # Competitive insights
-        if self.external_factors["competitive_intensity"] > 0.8:
+        if self.external_factors["competitive_intensity"] > INSIGHT_COMPETITION_HIGH_THRESHOLD:
             insights.append("Market is highly competitive. Differentiation is crucial for success.")
         
         # Trend insights
-        highest_trend = max(self.trends.items(), key=lambda x: x[1])
-        insights.append(f"Consumer interest in {highest_trend[0].replace('_', ' ')} is particularly strong.")
+        if self.trends: # Ensure trends is not empty
+            highest_trend_key, highest_trend_value = max(self.trends.items(), key=lambda item: item[1])
+            insights.append(f"Consumer interest in {highest_trend_key.replace('_', ' ')} is particularly strong.")
         
         # Segment-specific insights
-        largest_segment = max(self.segments.items(), key=lambda x: x[1]["size"])
-        insights.append(f"The {largest_segment[0]} segment represents {int(largest_segment[1]['size']*100)}% of the market.")
+        if self.segments: # Ensure segments is not empty
+            largest_segment_name, largest_segment_info = max(self.segments.items(), key=lambda item: item[1]["size"])
+            insights.append(f"The {largest_segment_name} segment represents {int(largest_segment_info['size']*100.0)}% of the market.")
         
         # Round-specific insights
-        if round_number == 1:
+        if round_number == INSIGHT_ROUND_EARLY_GAME:
             insights.append("Market is in early development stage with room for all players to establish position.")
-        elif round_number == 5:
+        elif round_number == INSIGHT_ROUND_MID_GAME_CONSOLIDATION:
             insights.append("Mid-game market consolidation is beginning. Strategic positioning is crucial.")
-        elif round_number == 8:
+        elif round_number == INSIGHT_ROUND_LATE_GAME_MATURITY:
             insights.append("Late-game market maturity approaching. Innovation and sustainability gaining importance.")
         
         return insights

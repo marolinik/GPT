@@ -59,25 +59,58 @@ class GameEngine {
                 url = `/api/team/game_state/${this.gameId}/${this.id}?team_code=${this.accessCode}`;
             }
             
+            console.log(`Fetching game state from: ${url}`);
+            
             const response = await fetch(url);
             
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+                console.error(`HTTP error! Status: ${response.status}, Url: ${url}`);
+                const errorText = await response.text();
+                console.error(`Error response: ${errorText}`);
+                throw new Error(`HTTP error! Status: ${response.status}, Response: ${errorText}`);
             }
             
-            const data = await response.json();
-            this.gameState = data;
-            this.currentRound = data.round;
-            this.totalRounds = data.total_rounds;
-            this.isFinished = data.finished || false;
+            const responseText = await response.text();
             
-            // Update UI with new state
-            this.updateUI();
+            let data;
+            try {
+                data = JSON.parse(responseText);
+                console.log('Game state data received:', data);
+            } catch (e) {
+                console.error('Failed to parse JSON response:', responseText);
+                throw new Error('Invalid JSON response from server');
+            }
+            
+            if (!data || typeof data !== 'object') {
+                console.error('Invalid game state data:', data);
+                throw new Error('Invalid game state data received');
+            }
+            
+            // Store full game state data
+            this.gameState = data;
+            
+            // Parse key information with fallbacks
+            this.currentRound = parseInt(data.round || data.current_round) || 1;
+            this.totalRounds = parseInt(data.total_rounds) || 10;
+            this.isFinished = Boolean(data.finished || data.is_finished);
+            
+            console.log(`Game state updated - Round: ${this.currentRound}, Total Rounds: ${this.totalRounds}, Finished: ${this.isFinished}`);
+            console.log('Round results:', data.round_results);
+            
+            // Update UI with new state (wrapped in try/catch for safety)
+            try {
+                this.updateUI();
+            } catch (uiError) {
+                console.error('Error during UI update:', uiError);
+                this.showError('Error updating the UI. Details: ' + uiError.message);
+            }
             
             return data;
         } catch (error) {
             console.error('Error fetching game state:', error);
-            this.showError('Failed to fetch game state. Please check your connection and try again.');
+            this.stopPolling(); // Stop polling to avoid repeated error messages
+            this.showError(`Failed to fetch game state. ${error.message}`);
+            return null;
         }
     }
     
@@ -130,11 +163,21 @@ class GameEngine {
     
     setupTeamUI() {
         // Team-specific UI setup
-        document.getElementById('submitDecisionsBtn').addEventListener('click', () => this.submitDecisions());
+        const submitButton = document.getElementById('submitDecisionsBtn');
+        if (submitButton) {
+            submitButton.addEventListener('click', () => this.submitDecisions());
+        }
         
-        // Setup product segment toggles
+        // Setup product segment toggles - with improved handling
         document.querySelectorAll('.segment-toggle').forEach(toggle => {
             toggle.addEventListener('change', (e) => {
+                if (this.hasSubmitted) {
+                    e.preventDefault();
+                    e.target.checked = !e.target.checked; // Revert the change
+                    this.showError('Cannot change decisions after submission for this round.');
+                    return;
+                }
+                
                 const segmentId = e.target.getAttribute('data-segment');
                 const isActive = e.target.checked;
                 
@@ -144,25 +187,88 @@ class GameEngine {
                     segmentDetails.style.display = isActive ? 'block' : 'none';
                 }
                 
-                // Update current decisions
+                // Update current decisions immediately
                 if (!this.currentDecisions.products) {
                     this.currentDecisions.products = {};
                 }
                 
+                // Make sure we preserve existing values when toggling
                 if (!this.currentDecisions.products[segmentId]) {
-                    this.currentDecisions.products[segmentId] = {};
+                    const product = this.gameState.company.products[segmentId];
+                    this.currentDecisions.products[segmentId] = {
+                        active: isActive,
+                        price: product.price,
+                        quality: product.quality,
+                        features: product.features,
+                        production_volume: product.production_volume,
+                        marketing_budget: product.marketing_budget
+                    };
+                } else {
+                    this.currentDecisions.products[segmentId].active = isActive;
                 }
                 
-                this.currentDecisions.products[segmentId].active = isActive;
+                console.log(`Segment ${segmentId} active state changed to: ${isActive}`);
+                console.log('Current decisions:', this.currentDecisions);
             });
         });
         
-        // Setup numeric input handlers
+        // Setup numeric input handlers with improved error handling
         document.querySelectorAll('input[type="number"]').forEach(input => {
+            // Set initial value in currentDecisions
+            const category = input.getAttribute('data-category');
+            const field = input.getAttribute('data-field');
+            
+            if (!field || !category) return; // Skip if missing attributes
+            
+            const value = parseFloat(input.value) || 0;
+            
+            if (category === 'product') {
+                const segment = input.getAttribute('data-segment');
+                if (!segment) return;
+                
+                if (!this.currentDecisions.products) {
+                    this.currentDecisions.products = {};
+                }
+                
+                if (!this.currentDecisions.products[segment]) {
+                    const product = this.gameState.company.products[segment];
+                    if (product) {
+                        this.currentDecisions.products[segment] = {
+                            active: product.active,
+                            price: product.price,
+                            quality: product.quality,
+                            features: product.features,
+                            production_volume: product.production_volume,
+                            marketing_budget: product.marketing_budget
+                        };
+                    } else {
+                        this.currentDecisions.products[segment] = {
+                            active: true
+                        };
+                    }
+                }
+                
+                this.currentDecisions.products[segment][field] = value;
+            } else if (category === 'strategy') {
+                if (!this.currentDecisions.strategy) {
+                    this.currentDecisions.strategy = {};
+                }
+                
+                this.currentDecisions.strategy[field] = value;
+            }
+            
+            // Add event listener for changes
             input.addEventListener('change', (e) => {
+                if (this.hasSubmitted) {
+                    e.preventDefault();
+                    e.target.value = this.gameState.company.products[segment]?.[field] || e.target.defaultValue;
+                    this.showError('Cannot change decisions after submission for this round.');
+                    return;
+                }
+                
                 const category = e.target.getAttribute('data-category');
                 const field = e.target.getAttribute('data-field');
-                const value = parseFloat(e.target.value);
+                const value = parseFloat(e.target.value) || 0;
                 
                 if (category === 'product') {
                     const segment = e.target.getAttribute('data-segment');
@@ -172,25 +278,43 @@ class GameEngine {
                     }
                     
                     if (!this.currentDecisions.products[segment]) {
-                        this.currentDecisions.products[segment] = {};
+                        const product = this.gameState.company.products[segment];
+                        this.currentDecisions.products[segment] = {
+                            active: product.active,
+                            price: product.price,
+                            quality: product.quality,
+                            features: product.features, 
+                            production_volume: product.production_volume,
+                            marketing_budget: product.marketing_budget
+                        };
                     }
                     
                     this.currentDecisions.products[segment][field] = value;
-                } else {
-                    if (!this.currentDecisions[category]) {
-                        this.currentDecisions[category] = {};
+                    console.log(`Updated ${segment} ${field} to ${value}`);
+                } else if (category === 'strategy') {
+                    if (!this.currentDecisions.strategy) {
+                        this.currentDecisions.strategy = {};
                     }
                     
-                    this.currentDecisions[category][field] = value;
+                    this.currentDecisions.strategy[field] = value;
+                    console.log(`Updated strategy ${field} to ${value}`);
                 }
+                
+                console.log('Current decisions:', this.currentDecisions);
             });
         });
         
-        // Setup tabs
+        // Setup tabs with proper identification
         document.querySelectorAll('.nav-link').forEach(tab => {
             tab.addEventListener('click', (e) => {
                 e.preventDefault();
-                const target = e.target.getAttribute('href');
+                
+                // Get the target from data-bs-target attribute
+                const targetId = e.target.getAttribute('data-bs-target');
+                if (!targetId) return;
+                
+                const targetPane = document.querySelector(targetId);
+                if (!targetPane) return;
                 
                 // Hide all tab contents
                 document.querySelectorAll('.tab-pane').forEach(pane => {
@@ -198,7 +322,7 @@ class GameEngine {
                 });
                 
                 // Show selected tab content
-                document.querySelector(target).classList.add('show', 'active');
+                targetPane.classList.add('show', 'active');
                 
                 // Update active tab
                 document.querySelectorAll('.nav-link').forEach(t => {
@@ -213,73 +337,190 @@ class GameEngine {
         // Common UI updates
         document.getElementById('roundDisplay').textContent = `Round ${this.currentRound} of ${this.totalRounds}`;
         
-        if (this.role === 'admin') {
-            this.updateAdminUI();
-        } else {
-            this.updateTeamUI();
+        // Handle potential errors that might occur during UI updates
+        try {
+            if (this.role === 'admin') {
+                this.updateAdminUI();
+            } else {
+                this.updateTeamUI();
+            }
+        } catch (error) {
+            console.error('Error updating UI:', error);
+            this.showError('Error updating the game display. Please reload the page.');
         }
     }
     
     updateAdminUI() {
-        // Update admin-specific UI elements
-        const teamsTable = document.getElementById('teamsTable');
-        const teamsBody = document.getElementById('teamsTableBody');
-        teamsBody.innerHTML = '';
-        
-        // Add team rows
-        for (const [teamId, team] of Object.entries(this.gameState.teams)) {
-            const row = document.createElement('tr');
-            
-            // Check if team has submitted for current round
-            const hasSubmitted = this.gameState.round_results[this.currentRound]?.submissions?.includes(teamId) || false;
-            if (hasSubmitted) {
-                row.classList.add('decision-submitted');
+        try {
+            // Safeguard against missing data
+            if (!this.gameState) {
+                console.error('No game state available for UI update');
+                this.showError('Game state unavailable. Please reload the page.');
+                return;
             }
             
-            row.innerHTML = `
-                <td>${teamId}</td>
-                <td>${team.name}</td>
-                <td>$${Math.round(team.financial.capital / 1000000)}M</td>
-                <td>${(team.market.market_share * 100).toFixed(1)}%</td>
-                <td>${team.scores.total.toFixed(1)}</td>
-                <td>${hasSubmitted ? '<span class="badge bg-success">Submitted</span>' : '<span class="badge bg-warning">Pending</span>'}</td>
-            `;
+            // Update admin-specific UI elements
+            const teamsBody = document.getElementById('teamsTableBody');
             
-            teamsBody.appendChild(row);
-        }
-        
-        // Update round control buttons
-        const startRoundBtn = document.getElementById('startRoundBtn');
-        const forceAdvanceBtn = document.getElementById('forceAdvanceBtn');
-        
-        if (this.isFinished) {
-            startRoundBtn.disabled = true;
-            forceAdvanceBtn.disabled = true;
-            startRoundBtn.textContent = 'Game Finished';
-        } else {
-            // Check if all teams have submitted
+            if (!teamsBody) {
+                console.error('Teams table body element not found');
+                return;
+            }
+            
+            // Clear the table body
+            teamsBody.innerHTML = '';
+            
+            if (!this.gameState.teams) {
+                console.error('Missing teams data in game state:', this.gameState);
+                const row = document.createElement('tr');
+                row.innerHTML = `<td colspan="6" class="text-center">Error loading team data</td>`;
+                teamsBody.appendChild(row);
+                return;
+            }
+            
+            // Get submission data
             const currentRoundStr = this.currentRound.toString();
-            const submissions = this.gameState.round_results[currentRoundStr]?.submissions || [];
-            const allSubmitted = Object.keys(this.gameState.teams).every(teamId => submissions.includes(teamId));
+            const roundResults = this.gameState.round_results || {};
+            const submissions = roundResults[currentRoundStr]?.submissions || [];
+
+            console.log(`Current round: ${this.currentRound}, Round data:`, roundResults[currentRoundStr]);
+            console.log(`Submissions:`, submissions);
+
+            // Add team rows
+            let allSubmitted = true;
+            const teamIds = Object.keys(this.gameState.teams);
             
-            startRoundBtn.disabled = !allSubmitted;
-            forceAdvanceBtn.disabled = false;
-            
-            if (allSubmitted) {
-                startRoundBtn.textContent = 'Start Next Round';
-            } else {
-                startRoundBtn.textContent = 'Waiting for All Teams';
+            for (const teamId of teamIds) {
+                const team = this.gameState.teams[teamId];
+                if (!team) continue;
+                
+                const row = document.createElement('tr');
+                
+                // Check if team has submitted for current round
+                const hasSubmitted = submissions.includes(teamId);
+                if (!hasSubmitted) {
+                    allSubmitted = false;
+                }
+                
+                if (hasSubmitted) {
+                    row.classList.add('decision-submitted');
+                }
+                
+                // Handle missing fields with defaults
+                const capital = team?.financial?.capital || 0;
+                const marketShare = team?.market?.market_share || 0;
+                const score = team?.scores?.total || 0;
+                
+                row.innerHTML = `
+                    <td>${teamId}</td>
+                    <td>${team?.name || teamId}</td>
+                    <td>$${Math.round(capital / 1000000)}M</td>
+                    <td>${(marketShare * 100).toFixed(1)}%</td>
+                    <td>${score.toFixed(1)}</td>
+                    <td>${hasSubmitted ? 
+                        '<span class="badge bg-success">Submitted</span>' : 
+                        '<span class="badge bg-warning">Pending</span>'}</td>
+                `;
+                
+                teamsBody.appendChild(row);
             }
+            
+            // Update round control buttons
+            const startRoundBtn = document.getElementById('startRoundBtn');
+            const forceAdvanceBtn = document.getElementById('forceAdvanceBtn');
+            
+            if (!startRoundBtn || !forceAdvanceBtn) {
+                console.error('Round control buttons not found');
+                return;
+            }
+            
+            // Get the container class to set the button styles
+            const startRoundContainer = startRoundBtn.parentElement;
+            const forceAdvanceContainer = forceAdvanceBtn.parentElement;
+            
+            if (this.isFinished) {
+                startRoundBtn.disabled = true;
+                forceAdvanceBtn.disabled = true;
+                startRoundBtn.textContent = 'Game Finished';
+                forceAdvanceBtn.textContent = 'Game Finished';
+                
+                if (startRoundContainer) startRoundContainer.classList.add('btn-secondary');
+                if (forceAdvanceContainer) forceAdvanceContainer.classList.add('btn-secondary');
+            } else {
+                console.log(`All submitted: ${allSubmitted}. Teams: ${teamIds.length}, Submissions: ${submissions.length}`);
+                
+                // Update the Start Round button
+                startRoundBtn.disabled = !allSubmitted;
+                
+                if (allSubmitted) {
+                    startRoundBtn.textContent = 'Start Next Round';
+                    startRoundBtn.classList.remove('btn-secondary');
+                    startRoundBtn.classList.add('btn-success');
+                    
+                    if (startRoundContainer) {
+                        startRoundContainer.classList.remove('bg-secondary');
+                        startRoundContainer.classList.add('bg-success');
+                    }
+                } else {
+                    startRoundBtn.textContent = `Waiting for Teams (${submissions.length}/${teamIds.length})`;
+                    startRoundBtn.classList.remove('btn-success');
+                    startRoundBtn.classList.add('btn-secondary');
+                    
+                    if (startRoundContainer) {
+                        startRoundContainer.classList.remove('bg-success');
+                        startRoundContainer.classList.add('bg-secondary');
+                    }
+                }
+                
+                // Update the Force Advance button
+                forceAdvanceBtn.disabled = false;
+                forceAdvanceBtn.textContent = 'Force Advance to Round ' + (this.currentRound + 1);
+                
+                if (forceAdvanceContainer) {
+                    forceAdvanceContainer.classList.add('bg-warning');
+                }
+            }
+            
+            // Update round display
+            const roundDisplay = document.getElementById('roundDisplay');
+            if (roundDisplay) {
+                roundDisplay.textContent = `Round ${this.currentRound} of ${this.totalRounds}`;
+                roundDisplay.classList.remove('alert-warning', 'alert-danger', 'alert-success');
+                
+                if (this.isFinished) {
+                    roundDisplay.classList.add('alert-success');
+                    roundDisplay.textContent += ' (Game Complete)';
+                } else if (allSubmitted) {
+                    roundDisplay.classList.add('alert-success');
+                    roundDisplay.textContent += ' (Ready to Advance)';
+                } else {
+                    roundDisplay.classList.add('alert-warning');
+                    roundDisplay.textContent += ` (${submissions.length}/${teamIds.length} Submitted)`;
+                }
+            }
+            
+            // Safely update other UI sections
+            try {
+                this.updateMarketOverview();
+            } catch (error) {
+                console.error('Error updating market overview:', error);
+            }
+            
+            try {
+                this.updateEventsList();
+            } catch (error) {
+                console.error('Error updating events list:', error);
+            }
+            
+            try {
+                this.updateRankings();
+            } catch (error) {
+                console.error('Error updating rankings:', error);
+            }
+        } catch (error) {
+            console.error('Error in updateAdminUI:', error);
+            this.showError('Error updating the game display. Please reload the page.');
         }
-        
-        // Update market overview
-        this.updateMarketOverview();
-        
-        // Update events list
-        this.updateEventsList();
-        
-        // Update rankings
-        this.updateRankings();
     }
     
     updateTeamUI() {
@@ -293,21 +534,76 @@ class GameEngine {
         document.getElementById('rdCapabilityValue').textContent = company.operational.r_d_capability.toFixed(1);
         document.getElementById('scoreValue').textContent = company.scores.total.toFixed(1);
         
-        // Update product segments
+        // Check if team has already submitted for this round
+        const currentRoundStr = this.currentRound.toString();
+        const roundResults = this.gameState.round_results || {};
+        const submissions = roundResults[currentRoundStr]?.submissions || [];
+        this.hasSubmitted = submissions.includes(this.id);
+        
+        // Update form submission status before updating inputs to prevent data loss
+        const submitBtn = document.getElementById('submitDecisionsBtn');
+        const decisionForm = document.getElementById('decisionForm');
+        
+        if (this.hasSubmitted) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Decisions Submitted for Round ' + this.currentRound;
+            decisionForm.classList.add('decision-submitted');
+            
+            // Disable all form inputs when submitted
+            decisionForm.querySelectorAll('input').forEach(input => {
+                input.disabled = true;
+            });
+        } else {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit Decisions for Round ' + this.currentRound;
+            decisionForm.classList.remove('decision-submitted');
+            
+            // Enable all form inputs when not submitted
+            decisionForm.querySelectorAll('input').forEach(input => {
+                input.disabled = false;
+            });
+        }
+        
+        // Update product segments with current values from state
         for (const [segment, product] of Object.entries(company.products)) {
             const segmentToggle = document.querySelector(`.segment-toggle[data-segment="${segment}"]`);
             const segmentDetails = document.querySelector(`.segment-details[data-segment="${segment}"]`);
             
             if (segmentToggle && segmentDetails) {
+                // Update toggle state
                 segmentToggle.checked = product.active;
+                
+                // Show/hide segment details
                 segmentDetails.style.display = product.active ? 'block' : 'none';
                 
-                // Update product fields
-                document.querySelector(`input[data-category="product"][data-segment="${segment}"][data-field="price"]`).value = product.price;
-                document.querySelector(`input[data-category="product"][data-segment="${segment}"][data-field="quality"]`).value = product.quality;
-                document.querySelector(`input[data-category="product"][data-segment="${segment}"][data-field="features"]`).value = product.features;
-                document.querySelector(`input[data-category="product"][data-segment="${segment}"][data-field="production_volume"]`).value = product.production_volume;
-                document.querySelector(`input[data-category="product"][data-segment="${segment}"][data-field="marketing_budget"]`).value = product.marketing_budget;
+                // Update product fields with current values
+                const priceInput = document.querySelector(`input[data-category="product"][data-segment="${segment}"][data-field="price"]`);
+                const qualityInput = document.querySelector(`input[data-category="product"][data-segment="${segment}"][data-field="quality"]`);
+                const featuresInput = document.querySelector(`input[data-category="product"][data-segment="${segment}"][data-field="features"]`);
+                const volumeInput = document.querySelector(`input[data-category="product"][data-segment="${segment}"][data-field="production_volume"]`);
+                const marketingInput = document.querySelector(`input[data-category="product"][data-segment="${segment}"][data-field="marketing_budget"]`);
+                
+                if (priceInput) priceInput.value = product.price;
+                if (qualityInput) qualityInput.value = product.quality;
+                if (featuresInput) featuresInput.value = product.features;
+                if (volumeInput) volumeInput.value = product.production_volume;
+                if (marketingInput) marketingInput.value = product.marketing_budget;
+                
+                // Ensure segment is reflected in currentDecisions
+                if (!this.currentDecisions.products) {
+                    this.currentDecisions.products = {};
+                }
+                
+                if (!this.currentDecisions.products[segment]) {
+                    this.currentDecisions.products[segment] = {
+                        active: product.active,
+                        price: product.price,
+                        quality: product.quality,
+                        features: product.features,
+                        production_volume: product.production_volume,
+                        marketing_budget: product.marketing_budget
+                    };
+                }
             }
         }
         
@@ -323,22 +619,6 @@ class GameEngine {
         // Update previous results if available
         if (this.gameState.previous_results) {
             this.updatePreviousResults();
-        }
-        
-        // Check if team has already submitted for this round
-        const currentRoundStr = this.currentRound.toString();
-        const submissions = this.gameState.previous_results?.submissions || [];
-        this.hasSubmitted = submissions.includes(this.id);
-        
-        const submitBtn = document.getElementById('submitDecisionsBtn');
-        if (this.hasSubmitted) {
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Decisions Submitted';
-            document.getElementById('decisionForm').classList.add('decision-submitted');
-        } else {
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Submit Decisions';
-            document.getElementById('decisionForm').classList.remove('decision-submitted');
         }
     }
     
@@ -581,6 +861,8 @@ class GameEngine {
         this.showLoading();
         
         try {
+            console.log(`Starting new round for game ${this.gameId}`);
+            
             const response = await fetch(`/api/admin/advance_round/${this.gameId}?admin_code=${this.accessCode}`, {
                 method: 'POST',
                 headers: {
@@ -589,20 +871,30 @@ class GameEngine {
                 body: JSON.stringify({ force: false }),
             });
             
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+            console.log('Response status:', response.status);
+            
+            const responseText = await response.text();
+            console.log('Response text:', responseText);
+            
+            let result;
+            try {
+                result = JSON.parse(responseText);
+            } catch (e) {
+                throw new Error(`Invalid JSON response: ${responseText}`);
             }
             
-            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}, Message: ${result.error || 'Unknown error'}`);
+            }
             
             if (result.success) {
                 // Show success message
-                this.showSuccess(`Advanced to round ${result.current_round}`);
+                this.showSuccess(`Advanced to round ${result.round || result.current_round || 'next'}`);
                 
                 // Refresh game state
                 await this.fetchGameState();
             } else {
-                throw new Error(result.message || 'Unknown error');
+                throw new Error(result.error || 'Unknown error');
             }
         } catch (error) {
             console.error('Error starting new round:', error);
@@ -619,7 +911,7 @@ class GameEngine {
             return;
         }
         
-        if (!confirm('Are you sure you want to force advance to the next round? Any teams that have not submitted decisions will miss their turn.')) {
+        if (!confirm(`Are you sure you want to force advance to round ${this.currentRound + 1}? Any teams that have not submitted decisions will miss their turn.`)) {
             return;
         }
         
@@ -627,6 +919,8 @@ class GameEngine {
         this.showLoading();
         
         try {
+            console.log(`Forcing advance to next round for game ${this.gameId}`);
+            
             const response = await fetch(`/api/admin/advance_round/${this.gameId}?admin_code=${this.accessCode}`, {
                 method: 'POST',
                 headers: {
@@ -635,20 +929,30 @@ class GameEngine {
                 body: JSON.stringify({ force: true }),
             });
             
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+            console.log('Response status:', response.status);
+            
+            const responseText = await response.text();
+            console.log('Response text:', responseText);
+            
+            let result;
+            try {
+                result = JSON.parse(responseText);
+            } catch (e) {
+                throw new Error(`Invalid JSON response: ${responseText}`);
             }
             
-            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}, Message: ${result.error || 'Unknown error'}`);
+            }
             
             if (result.success) {
                 // Show success message
-                this.showSuccess(`Forced advance to round ${result.current_round}`);
+                this.showSuccess(`Forced advance to round ${result.round || result.current_round || 'next'}`);
                 
                 // Refresh game state
                 await this.fetchGameState();
             } else {
-                throw new Error(result.message || 'Unknown error');
+                throw new Error(result.error || 'Unknown error');
             }
         } catch (error) {
             console.error('Error forcing round advance:', error);

@@ -72,8 +72,17 @@ class GameState:
             return False
             
         # Generate strategic events for this round
-        self._generate_events()
+        new_events_this_round = self._generate_events()
         
+        # Apply impacts of the new events for the current round
+        logger.info(f"Applying {len(new_events_this_round)} new events for round {self.current_round}")
+        for event in new_events_this_round:
+            if event.round == self.current_round: # Ensure event is for the current round
+                logger.info(f"Applying event: {event.title} (ID: {event.event_id})")
+                event.apply_impact(self) # 'self' is the game_state instance
+            else:
+                logger.warning(f"Skipping event {event.title} (ID: {event.event_id}) intended for round {event.round}, current round is {self.current_round}")
+
         # Update market conditions
         if self.market:
             self.market.update_market_conditions(self.current_round)
@@ -131,13 +140,14 @@ class GameState:
         # Number of events increases as game progresses
         num_events = 1 if self.current_round < 5 else 2
         
-        new_events = []
+        generated_events_for_round = []
         for _ in range(num_events):
             event = Event.generate_random_event(self.current_round)
-            new_events.append(event)
+            generated_events_for_round.append(event)
             
-        self.events.extend(new_events)
-        return new_events
+        self.events.extend(generated_events_for_round) # Add to the main list of all events
+        logger.info(f"Generated {len(generated_events_for_round)} events for round {self.current_round}. Total events now: {len(self.events)}")
+        return generated_events_for_round # Return only the newly generated events
         
     def _generate_market_report(self):
         """Generate market report for the current round"""
@@ -148,6 +158,8 @@ class GameState:
         
     def get_team_view(self, team_id):
         """Get the game state from a specific team's perspective"""
+        logger.info(f"Getting team view for team {team_id}, game {self.game_id}")
+        
         if team_id not in self.teams:
             logger.warning(f"Team not found: {team_id}")
             return None
@@ -181,7 +193,7 @@ class GameState:
                 "market_results": self.round_results[prev_round]["market_results"].get(team_id)
             }
         
-        return {
+        team_view = {
             "round": self.current_round,
             "total_rounds": self.num_rounds,
             "company": company.get_state(),
@@ -191,19 +203,38 @@ class GameState:
             "previous_results": previous_results
         }
         
+        logger.info(f"Completed team view construction for team {team_id}, round {self.current_round}")
+        return team_view
+        
     def get_admin_view(self):
         """Get the complete game state for the admin/facilitator"""
-        return {
-            "game_id": self.game_id,
-            "current_round": self.current_round,
-            "total_rounds": self.num_rounds,
-            "started": self.started,
-            "finished": self.finished,
-            "teams": {team_id: company.get_state() for team_id, company in self.teams.items()},
-            "market": self._generate_market_report(),
-            "events": [event.to_dict() for event in self.events],
-            "round_results": self.round_results
-        }
+        logger.info(f"Getting admin view for game {self.game_id}, round {self.current_round}")
+        
+        try:
+            admin_view = {
+                "game_id": self.game_id,
+                "round": self.current_round,
+                "total_rounds": self.num_rounds,
+                "started": self.started,
+                "finished": self.finished,
+                "teams": {team_id: company.get_state() for team_id, company in self.teams.items()},
+                "market": self._generate_market_report(),
+                "events": [event.to_dict() for event in self.events], # Shows all historical events
+                "round_results": self.round_results
+            }
+            
+            logger.info(f"Completed admin view construction for game {self.game_id}, round {self.current_round}")
+            return admin_view
+            
+        except Exception as e:
+            logger.error(f"Error generating admin view for game {self.game_id}: {str(e)}", exc_info=True)
+            # Return a minimal valid response
+            return {
+                "game_id": self.game_id,
+                "round": self.current_round,
+                "total_rounds": self.num_rounds,
+                "error": "Error generating complete game state"
+            }
         
     def get_rankings(self):
         """Get current team rankings based on scores"""
@@ -335,6 +366,7 @@ class GameState:
             game.finished = state_dict.get("finished", False)
             game.team_codes = state_dict.get("team_codes", {})
             game.admin_code = state_dict.get("admin_code")
+            game.events = [] # Initialize events list, will be populated from dict
             
             # Restore teams
             from .company import Company

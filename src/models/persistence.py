@@ -125,7 +125,8 @@ class GamePersistence:
             # Save the updated index
             index_saved = self._save_code_index()
             if not index_saved:
-                logger.warning(f"Failed to save code index for game {game_id}")
+                logger.error(f"CRITICAL: Failed to save code index for game {game_id} after saving game file. Game state may be inconsistent.")
+                return False
             
             # Update the cache
             self.game_cache[game_id] = game_state
@@ -237,7 +238,17 @@ class GamePersistence:
             # Save the updated index
             index_saved = self._save_code_index()
             if not index_saved:
-                logger.warning(f"Failed to save code index after deleting game {game_id}")
+                logger.error(f"CRITICAL: Failed to save code index after removing game {game_id} from in-memory index. Code index on disk is now potentially stale.")
+                game_file_deleted = False
+                game_path = self._get_game_path(game_id)
+                if os.path.exists(game_path):
+                    try:
+                        os.remove(game_path)
+                        logger.info(f"Game file {game_id} deleted despite index save failure.")
+                        game_file_deleted = True
+                    except Exception as file_del_e:
+                        logger.error(f"Error deleting game file {game_id} after index save failure: {file_del_e}")
+                return False
             
             # Delete the game file
             game_path = self._get_game_path(game_id)
