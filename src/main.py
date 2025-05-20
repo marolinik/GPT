@@ -128,7 +128,7 @@ def advance_round(game_id):
             # Save updated game state
             game_state_manager.save_game_state(game_state)
             
-            return jsonify({"success": True, "round": game_state.current_round})
+            return jsonify({"success": True, "current_round": game_state.current_round})
         else:
             return jsonify({"error": "Game already finished"}), 400
     except Exception as e:
