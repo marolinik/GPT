@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StrategyMasters: The Smartphone Industry Challenge</title>
+    <title>StrategyMasters: Izazov industrije pametnih telefona</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
@@ -14,34 +14,34 @@
                 <div class="card shadow">
                     <div class="card-header bg-primary text-white">
                         <h1 class="text-center">StrategyMasters</h1>
-                        <h3 class="text-center">The Smartphone Industry Challenge</h3>
+                        <h3 class="text-center">Izazov industrije pametnih telefona</h3>
                     </div>
                     <div class="card-body">
                         <div class="text-center mb-4">
-                            <p class="lead">A multiplayer business strategy simulation for MBA lectures</p>
+                            <p class="lead">Simulacija poslovne strategije za više igrača za MBA predavanja</p>
                         </div>
 
                         <div class="row mb-4">
                             <div class="col-md-6">
                                 <div class="card h-100">
                                     <div class="card-header bg-success text-white">
-                                        <h4>Facilitator</h4>
+                                        <h4>Voditelj</h4>
                                     </div>
                                     <div class="card-body">
-                                        <p>Create a new game session or manage an existing one</p>
-                                        <button class="btn btn-success w-100 mb-2" data-bs-toggle="modal" data-bs-target="#createGameModal">Create New Game</button>
-                                        <button class="btn btn-outline-success w-100" data-bs-toggle="modal" data-bs-target="#joinAdminModal">Join as Facilitator</button>
+                                        <p>Kreirajte novu sesiju igre ili upravljajte postojećom</p>
+                                        <button class="btn btn-success w-100 mb-2" data-bs-toggle="modal" data-bs-target="#createGameModal">Kreiraj novu igru</button>
+                                        <button class="btn btn-outline-success w-100" data-bs-toggle="modal" data-bs-target="#joinAdminModal">Pridruži se kao voditelj</button>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="card h-100">
                                     <div class="card-header bg-info text-white">
-                                        <h4>Team</h4>
+                                        <h4>Tim</h4>
                                     </div>
                                     <div class="card-body">
-                                        <p>Join an existing game as a team</p>
-                                        <button class="btn btn-info w-100" data-bs-toggle="modal" data-bs-target="#joinTeamModal">Join as Team</button>
+                                        <p>Pridružite se postojećoj igri kao tim</p>
+                                        <button class="btn btn-info w-100" data-bs-toggle="modal" data-bs-target="#joinTeamModal">Pridruži se kao tim</button>
                                     </div>
                                 </div>
                             </div>
@@ -49,19 +49,19 @@
 
                         <div class="card mb-4">
                             <div class="card-header bg-secondary text-white">
-                                <h4>About the Simulation</h4>
+                                <h4>O simulaciji</h4>
                             </div>
                             <div class="card-body">
-                                <p>StrategyMasters: The Smartphone Industry Challenge is a multiplayer business strategy simulation designed for MBA lectures. Teams compete as smartphone manufacturers in a dynamic market, making strategic decisions over 10 rounds to maximize their company's performance.</p>
+                                <p>StrategyMasters: Izazov industrije pametnih telefona je simulacija poslovne strategije za više igrača namenjena MBA predavanjima. Timovi se takmiče kao proizvođači pametnih telefona na dinamičnom tržištu, donoseći strateške odluke tokom 10 rundi kako bi maksimizirali učinak svoje kompanije.</p>
                                 
-                                <h5>Key Features:</h5>
+                                <h5>Ključne karakteristike:</h5>
                                 <ul>
-                                    <li>Realistic smartphone industry simulation</li>
-                                    <li>Support for up to 5 competing teams</li>
-                                    <li>10 rounds of strategic decision-making</li>
-                                    <li>Balanced scorecard performance evaluation</li>
-                                    <li>Dynamic market conditions and strategic events</li>
-                                    <li>Application of core strategic frameworks</li>
+                                    <li>Realistična simulacija industrije pametnih telefona</li>
+                                    <li>Podrška za do 5 takmičarskih timova</li>
+                                    <li>10 rundi strateškog odlučivanja</li>
+                                    <li>Evaluacija učinka pomoću balansirane liste pokazatelja</li>
+                                    <li>Dinamični tržišni uslovi i strateški događaji</li>
+                                    <li>Primena ključnih strateških okvira</li>
                                 </ul>
                             </div>
                         </div>
@@ -76,30 +76,30 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title" id="createGameModalLabel">Create New Game</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="createGameModalLabel">Kreiraj novu igru</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zatvori"></button>
                 </div>
                 <div class="modal-body">
                     <form id="createGameForm">
                         <div class="mb-3">
-                            <label for="numTeams" class="form-label">Number of Teams</label>
+                            <label for="numTeams" class="form-label">Broj timova</label>
                             <select class="form-select" id="numTeams" required>
-                                <option value="2">2 Teams</option>
-                                <option value="3">3 Teams</option>
-                                <option value="4">4 Teams</option>
-                                <option value="5" selected>5 Teams</option>
+                                <option value="2">2 tima</option>
+                                <option value="3">3 tima</option>
+                                <option value="4">4 tima</option>
+                                <option value="5" selected>5 timova</option>
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label for="numRounds" class="form-label">Number of Rounds</label>
+                            <label for="numRounds" class="form-label">Broj rundi</label>
                             <select class="form-select" id="numRounds" required>
-                                <option value="5">5 Rounds</option>
-                                <option value="8">8 Rounds</option>
-                                <option value="10" selected>10 Rounds</option>
-                                <option value="12">12 Rounds</option>
+                                <option value="5">5 rundi</option>
+                                <option value="8">8 rundi</option>
+                                <option value="10" selected>10 rundi</option>
+                                <option value="12">12 rundi</option>
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-success w-100">Create Game</button>
+                        <button type="submit" class="btn btn-success w-100">Kreiraj igru</button>
                     </form>
                 </div>
             </div>
@@ -111,20 +111,20 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title" id="joinAdminModalLabel">Join as Facilitator</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="joinAdminModalLabel">Pridruži se kao voditelj</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zatvori"></button>
                 </div>
                 <div class="modal-body">
                     <form id="joinAdminForm">
                         <div class="mb-3">
-                            <label for="adminGameId" class="form-label">Game ID</label>
+                            <label for="adminGameId" class="form-label">ID igre</label>
                             <input type="text" class="form-control" id="adminGameId" required>
                         </div>
                         <div class="mb-3">
-                            <label for="adminCode" class="form-label">Admin Code</label>
+                            <label for="adminCode" class="form-label">Admin kod</label>
                             <input type="text" class="form-control" id="adminCode" required>
                         </div>
-                        <button type="submit" class="btn btn-success w-100">Join Game</button>
+                        <button type="submit" class="btn btn-success w-100">Pridruži se igri</button>
                     </form>
                 </div>
             </div>
@@ -136,24 +136,24 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header bg-info text-white">
-                    <h5 class="modal-title" id="joinTeamModalLabel">Join as Team</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="joinTeamModalLabel">Pridruži se kao tim</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zatvori"></button>
                 </div>
                 <div class="modal-body">
                     <form id="joinTeamForm">
                         <div class="mb-3">
-                            <label for="teamGameId" class="form-label">Game ID</label>
+                            <label for="teamGameId" class="form-label">ID igre</label>
                             <input type="text" class="form-control" id="teamGameId" required>
                         </div>
                         <div class="mb-3">
-                            <label for="teamId" class="form-label">Team ID</label>
+                            <label for="teamId" class="form-label">ID tima</label>
                             <input type="text" class="form-control" id="teamId" required>
                         </div>
                         <div class="mb-3">
-                            <label for="teamCode" class="form-label">Team Code</label>
+                            <label for="teamCode" class="form-label">Kod tima</label>
                             <input type="text" class="form-control" id="teamCode" required>
                         </div>
-                        <button type="submit" class="btn btn-info w-100">Join Game</button>
+                        <button type="submit" class="btn btn-info w-100">Pridruži se igri</button>
                     </form>
                 </div>
             </div>
@@ -165,31 +165,31 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title" id="gameCreatedModalLabel">Game Created Successfully</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="gameCreatedModalLabel">Igra uspešno kreirana</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zatvori"></button>
                 </div>
                 <div class="modal-body">
                     <div class="alert alert-warning">
-                        <strong>Important:</strong> Save this information! You'll need these codes to access the game.
+                        <strong>Važno:</strong> Sačuvajte ove informacije! Biće vam potrebni ovi kodovi za pristup igri.
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label"><strong>Game ID:</strong></label>
+                        <label class="form-label"><strong>ID igre:</strong></label>
                         <input type="text" class="form-control" id="createdGameId" readonly>
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label"><strong>Admin Code:</strong></label>
+                        <label class="form-label"><strong>Admin kod:</strong></label>
                         <input type="text" class="form-control" id="createdAdminCode" readonly>
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label"><strong>Team Codes:</strong></label>
+                        <label class="form-label"><strong>Kodovi timova:</strong></label>
                         <div id="teamCodesList" class="list-group"></div>
                     </div>
                     
                     <div class="d-grid gap-2">
-                        <button class="btn btn-primary" id="goToAdminDashboard">Go to Admin Dashboard</button>
+                        <button class="btn btn-primary" id="goToAdminDashboard">Idi na admin kontrolnu tablu</button>
                     </div>
                 </div>
             </div>
@@ -246,8 +246,8 @@
                     successModal.show();
                 })
                 .catch(error => {
-                    console.error('Error creating game:', error);
-                    alert('Error creating game. Please try again.');
+                    console.error('Greška pri kreiranju igre:', error);
+                    alert('Greška pri kreiranju igre. Molimo pokušajte ponovo.');
                 });
             });
             
@@ -278,12 +278,12 @@
                     if (data.redirect) {
                         window.location.href = data.redirect;
                     } else {
-                        throw new Error('No redirect URL received');
+                        throw new Error('Nije primljen URL za preusmeravanje');
                     }
                 })
                 .catch(error => {
-                    console.error('Error joining game:', error);
-                    alert('Error joining game: ' + error.message);
+                    console.error('Greška pri pridruživanju igri:', error);
+                    alert('Greška pri pridruživanju igri: ' + error.message);
                 });
             });
             
@@ -315,12 +315,12 @@
                     if (data.redirect) {
                         window.location.href = data.redirect;
                     } else {
-                        throw new Error('No redirect URL received');
+                        throw new Error('Nije primljen URL za preusmeravanje');
                     }
                 })
                 .catch(error => {
-                    console.error('Error joining game:', error);
-                    alert('Error joining game: ' + error.message);
+                    console.error('Greška pri pridruživanju igri:', error);
+                    alert('Greška pri pridruživanju igri: ' + error.message);
                 });
             });
         });

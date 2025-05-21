@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Results - StrategyMasters</title>
+    <title>Rezultati - StrategyMasters</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -12,12 +12,12 @@
     <div class="container-fluid dashboard-container">
         <div class="row mb-4">
             <div class="col-md-8">
-                <h1>StrategyMasters: The Smartphone Industry Challenge</h1>
-                <h3>Final Results</h3>
+                <h1>StrategyMasters: Izazov industrije pametnih telefona</h1>
+                <h3>Konačni rezultati</h3>
             </div>
             <div class="col-md-4 text-end">
                 <div class="alert alert-success">
-                    Game Completed
+                    Igra završena
                 </div>
             </div>
         </div>
@@ -26,25 +26,25 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header bg-primary text-white">
-                        <h4>Final Rankings</h4>
+                        <h4>Konačni poredak</h4>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
                             <table class="table table-striped table-hover">
                                 <thead>
                                     <tr>
-                                        <th>Rank</th>
-                                        <th>Company</th>
-                                        <th>Total Score</th>
-                                        <th>Financial</th>
-                                        <th>Market</th>
-                                        <th>Innovation</th>
-                                        <th>Sustainability</th>
+                                        <th>Rang</th>
+                                        <th>Kompanija</th>
+                                        <th>Ukupan rezultat</th>
+                                        <th>Finansijski</th>
+                                        <th>Tržišni</th>
+                                        <th>Inovacije</th>
+                                        <th>Održivost</th>
                                     </tr>
                                 </thead>
                                 <tbody id="finalRankingsTableBody">
                                     <tr>
-                                        <td colspan="7" class="text-center">Loading final rankings...</td>
+                                        <td colspan="7" class="text-center">Učitavanje konačnog poretka...</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -58,7 +58,7 @@
             <div class="col-md-6">
                 <div class="card mb-4">
                     <div class="card-header bg-info text-white">
-                        <h4>Market Share Evolution</h4>
+                        <h4>Razvoj tržišnog udela</h4>
                     </div>
                     <div class="card-body">
                         <div class="chart-container">
@@ -70,7 +70,7 @@
             <div class="col-md-6">
                 <div class="card mb-4">
                     <div class="card-header bg-warning text-dark">
-                        <h4>Score Evolution</h4>
+                        <h4>Razvoj rezultata</h4>
                     </div>
                     <div class="card-body">
                         <div class="chart-container">
@@ -85,27 +85,27 @@
             <div class="col-md-12">
                 <div class="card mb-4">
                     <div class="card-header bg-success text-white">
-                        <h4>Performance Analysis</h4>
+                        <h4>Analiza učinka</h4>
                     </div>
                     <div class="card-body">
                         <ul class="nav nav-tabs" id="analysisTabs" role="tablist">
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="financial-tab" data-bs-toggle="tab" data-bs-target="#financial" type="button" role="tab" aria-controls="financial" aria-selected="true">Financial</button>
+                                <button class="nav-link active" id="financial-tab" data-bs-toggle="tab" data-bs-target="#financial" type="button" role="tab" aria-controls="financial" aria-selected="true">Finansijski</button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="market-tab" data-bs-toggle="tab" data-bs-target="#market" type="button" role="tab" aria-controls="market" aria-selected="false">Market</button>
+                                <button class="nav-link" id="market-tab" data-bs-toggle="tab" data-bs-target="#market" type="button" role="tab" aria-controls="market" aria-selected="false">Tržišni</button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="innovation-tab" data-bs-toggle="tab" data-bs-target="#innovation" type="button" role="tab" aria-controls="innovation" aria-selected="false">Innovation</button>
+                                <button class="nav-link" id="innovation-tab" data-bs-toggle="tab" data-bs-target="#innovation" type="button" role="tab" aria-controls="innovation" aria-selected="false">Inovacije</button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="sustainability-tab" data-bs-toggle="tab" data-bs-target="#sustainability" type="button" role="tab" aria-controls="sustainability" aria-selected="false">Sustainability</button>
+                                <button class="nav-link" id="sustainability-tab" data-bs-toggle="tab" data-bs-target="#sustainability" type="button" role="tab" aria-controls="sustainability" aria-selected="false">Održivost</button>
                             </li>
                         </ul>
                         <div class="tab-content" id="analysisTabsContent">
                             <div class="tab-pane fade show active" id="financial" role="tabpanel" aria-labelledby="financial-tab">
                                 <div class="p-3">
-                                    <h5>Financial Performance</h5>
+                                    <h5>Finansijski učinak</h5>
                                     <div class="chart-container">
                                         <canvas id="financialChart"></canvas>
                                     </div>
@@ -113,7 +113,7 @@
                             </div>
                             <div class="tab-pane fade" id="market" role="tabpanel" aria-labelledby="market-tab">
                                 <div class="p-3">
-                                    <h5>Market Performance</h5>
+                                    <h5>Tržišni učinak</h5>
                                     <div class="chart-container">
                                         <canvas id="marketChart"></canvas>
                                     </div>
@@ -121,7 +121,7 @@
                             </div>
                             <div class="tab-pane fade" id="innovation" role="tabpanel" aria-labelledby="innovation-tab">
                                 <div class="p-3">
-                                    <h5>Innovation Performance</h5>
+                                    <h5>Učinak inovacija</h5>
                                     <div class="chart-container">
                                         <canvas id="innovationChart"></canvas>
                                     </div>
@@ -129,7 +129,7 @@
                             </div>
                             <div class="tab-pane fade" id="sustainability" role="tabpanel" aria-labelledby="sustainability-tab">
                                 <div class="p-3">
-                                    <h5>Sustainability Performance</h5>
+                                    <h5>Učinak održivosti</h5>
                                     <div class="chart-container">
                                         <canvas id="sustainabilityChart"></canvas>
                                     </div>
@@ -145,36 +145,36 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header bg-secondary text-white">
-                        <h4>Learning Outcomes</h4>
+                        <h4>Ishodi učenja</h4>
                     </div>
                     <div class="card-body">
-                        <h5>Key Strategic Concepts Applied</h5>
+                        <h5>Ključni primenjeni strateški koncepti</h5>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="card mb-3">
-                                    <div class="card-header">Porter's Five Forces</div>
+                                    <div class="card-header">Porterovih pet sila</div>
                                     <div class="card-body">
-                                        <p>This simulation demonstrated how competitive forces shape strategy in the smartphone industry:</p>
+                                        <p>Ova simulacija je pokazala kako konkurentske sile oblikuju strategiju u industriji pametnih telefona:</p>
                                         <ul>
-                                            <li><strong>Competitive Rivalry:</strong> Teams directly competed for market share across different segments</li>
-                                            <li><strong>Supplier Power:</strong> Component quality and costs affected product development</li>
-                                            <li><strong>Buyer Power:</strong> Different market segments showed varying price sensitivity</li>
-                                            <li><strong>Threat of New Entrants:</strong> Strategic events introduced new competitors</li>
-                                            <li><strong>Threat of Substitutes:</strong> Innovation was required to maintain relevance</li>
+                                            <li><strong>Konkurentsko rivalstvo:</strong> Timovi su se direktno takmičili za tržišni udeo u različitim segmentima</li>
+                                            <li><strong>Moć dobavljača:</strong> Kvalitet komponenti i troškovi uticali su na razvoj proizvoda</li>
+                                            <li><strong>Moć kupaca:</strong> Različiti tržišni segmenti pokazali su različitu osetljivost na cene</li>
+                                            <li><strong>Pretnja novih učesnika:</strong> Strateški događaji uveli su nove konkurente</li>
+                                            <li><strong>Pretnja zamenskih proizvoda:</strong> Inovacije su bile neophodne za održavanje relevantnosti</li>
                                         </ul>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="card mb-3">
-                                    <div class="card-header">Generic Strategies</div>
+                                    <div class="card-header">Generičke strategije</div>
                                     <div class="card-body">
-                                        <p>Teams employed different strategic approaches:</p>
+                                        <p>Timovi su primenjivali različite strateške pristupe:</p>
                                         <ul>
-                                            <li><strong>Cost Leadership:</strong> Competing on price in budget segments</li>
-                                            <li><strong>Differentiation:</strong> Creating unique value through quality and features</li>
-                                            <li><strong>Focus:</strong> Specializing in specific market segments</li>
-                                            <li><strong>Integrated Strategies:</strong> Balancing multiple approaches</li>
+                                            <li><strong>Liderstvo u troškovima:</strong> Takmičenje cenama u budžetskim segmentima</li>
+                                            <li><strong>Diferencijacija:</strong> Stvaranje jedinstvene vrednosti kroz kvalitet i karakteristike</li>
+                                            <li><strong>Fokus:</strong> Specijalizacija za određene tržišne segmente</li>
+                                            <li><strong>Integrisane strategije:</strong> Balansiranje više pristupa</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -184,41 +184,41 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="card mb-3">
-                                    <div class="card-header">Resource-Based View</div>
+                                    <div class="card-header">Pogled zasnovan na resursima</div>
                                     <div class="card-body">
-                                        <p>Teams developed unique capabilities and resources:</p>
+                                        <p>Timovi su razvijali jedinstvene sposobnosti i resurse:</p>
                                         <ul>
-                                            <li><strong>R&D Capability:</strong> Investment in innovation capacity</li>
-                                            <li><strong>Brand Strength:</strong> Building customer loyalty and recognition</li>
-                                            <li><strong>Production Capacity:</strong> Scaling operations to meet demand</li>
-                                            <li><strong>Quality Control:</strong> Ensuring consistent product quality</li>
+                                            <li><strong>R&D sposobnost:</strong> Ulaganje u inovativni kapacitet</li>
+                                            <li><strong>Snaga brenda:</strong> Izgradnja lojalnosti kupaca i prepoznatljivosti</li>
+                                            <li><strong>Proizvodni kapacitet:</strong> Prilagođavanje operacija zahtevima tržišta</li>
+                                            <li><strong>Kontrola kvaliteta:</strong> Obezbeđivanje doslednog kvaliteta proizvoda</li>
                                         </ul>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="card mb-3">
-                                    <div class="card-header">Balanced Scorecard</div>
+                                    <div class="card-header">Balansirana lista pokazatelja uspeha</div>
                                     <div class="card-body">
-                                        <p>Performance was measured across multiple dimensions:</p>
+                                        <p>Učinak je meren kroz više dimenzija:</p>
                                         <ul>
-                                            <li><strong>Financial:</strong> Profitability, revenue growth, and capital efficiency</li>
-                                            <li><strong>Market:</strong> Market share, customer satisfaction, and brand strength</li>
-                                            <li><strong>Innovation:</strong> R&D effectiveness and new product development</li>
-                                            <li><strong>Sustainability:</strong> Environmental impact and social responsibility</li>
+                                            <li><strong>Finansijska:</strong> Profitabilnost, rast prihoda i efikasnost kapitala</li>
+                                            <li><strong>Tržišna:</strong> Tržišni udeo, zadovoljstvo kupaca i snaga brenda</li>
+                                            <li><strong>Inovacije:</strong> Efikasnost R&D i razvoj novih proizvoda</li>
+                                            <li><strong>Održivost:</strong> Uticaj na životnu sredinu i društvena odgovornost</li>
                                         </ul>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <h5 class="mt-4">Reflection Questions for Teams</h5>
+                        <h5 class="mt-4">Pitanja za razmišljanje za timove</h5>
                         <ol>
-                            <li>How did your strategic positioning evolve over the course of the simulation?</li>
-                            <li>What trade-offs did you make in resource allocation, and how did they impact your results?</li>
-                            <li>How did you respond to market changes and strategic events?</li>
-                            <li>What would you do differently if you played again?</li>
-                            <li>How do the concepts from this simulation apply to real-world business strategy?</li>
+                            <li>Kako se vaša strateška pozicija razvijala tokom simulacije?</li>
+                            <li>Koje ste kompromise pravili u alokaciji resursa i kako su uticali na vaše rezultate?</li>
+                            <li>Kako ste odgovarali na promene na tržištu i strateške događaje?</li>
+                            <li>Šta biste uradili drugačije da igrate ponovo?</li>
+                            <li>Kako se koncepti iz ove simulacije primenjuju na poslovnu strategiju u stvarnom svetu?</li>
                         </ol>
                     </div>
                 </div>
@@ -256,12 +256,12 @@
                     initializeCharts(rankings);
                 })
                 .catch(error => {
-                    console.error('Error fetching rankings:', error);
+                    console.error('Greška pri dohvatanju rangiranja:', error);
                 });
                 
             function initializeCharts(rankings) {
                 // Sample data for charts - in a real implementation, this would come from the backend
-                const rounds = Array.from({length: 10}, (_, i) => `Round ${i+1}`);
+                const rounds = Array.from({length: 10}, (_, i) => `Runda ${i+1}`);
                 const companies = rankings.map(r => r.name);
                 const colors = [
                     'rgba(255, 99, 132, 0.7)',
@@ -292,7 +292,7 @@
                         plugins: {
                             title: {
                                 display: true,
-                                text: 'Market Share % by Round'
+                                text: 'Tržišni udeo % po rundi'
                             },
                         },
                         scales: {
@@ -301,7 +301,7 @@
                                 max: 100,
                                 title: {
                                     display: true,
-                                    text: 'Market Share %'
+                                    text: 'Tržišni udeo %'
                                 }
                             }
                         }
@@ -329,7 +329,7 @@
                         plugins: {
                             title: {
                                 display: true,
-                                text: 'Total Score by Round'
+                                text: 'Ukupan rezultat po rundi'
                             },
                         },
                         scales: {
@@ -338,7 +338,7 @@
                                 max: 100,
                                 title: {
                                     display: true,
-                                    text: 'Score'
+                                    text: 'Rezultat'
                                 }
                             }
                         }
@@ -353,7 +353,7 @@
                         labels: companies,
                         datasets: [
                             {
-                                label: 'Revenue',
+                                label: 'Prihod',
                                 data: rankings.map(r => Math.random() * 1000 + 500),
                                 backgroundColor: 'rgba(54, 162, 235, 0.7)',
                             },
@@ -370,7 +370,7 @@
                         plugins: {
                             title: {
                                 display: true,
-                                text: 'Financial Performance ($ millions)'
+                                text: 'Finansijski učinak (milioni $)'
                             },
                         },
                         scales: {
@@ -378,7 +378,7 @@
                                 beginAtZero: true,
                                 title: {
                                     display: true,
-                                    text: '$ Millions'
+                                    text: 'Milioni $'
                                 }
                             }
                         }
@@ -390,7 +390,7 @@
                 new Chart(marketCtx, {
                     type: 'radar',
                     data: {
-                        labels: ['Market Share', 'Brand Strength', 'Customer Satisfaction', 'Product Quality', 'Marketing Effectiveness'],
+                        labels: ['Tržišni udeo', 'Snaga brenda', 'Zadovoljstvo kupaca', 'Kvalitet proizvoda', 'Efikasnost marketinga'],
                         datasets: companies.map((company, index) => ({
                             label: company,
                             data: generateRandomData(5, 30, 90),
@@ -408,7 +408,7 @@
                         plugins: {
                             title: {
                                 display: true,
-                                text: 'Market Performance Metrics'
+                                text: 'Metrike tržišnog učinka'
                             },
                         },
                         scales: {
@@ -431,12 +431,12 @@
                         labels: companies,
                         datasets: [
                             {
-                                label: 'R&D Investment',
+                                label: 'R&D ulaganje',
                                 data: rankings.map(r => Math.random() * 100 + 50),
                                 backgroundColor: 'rgba(255, 99, 132, 0.7)',
                             },
                             {
-                                label: 'Innovation Index',
+                                label: 'Indeks inovacija',
                                 data: rankings.map(r => Math.random() * 50 + 30),
                                 backgroundColor: 'rgba(255, 206, 86, 0.7)',
                             }
@@ -448,7 +448,7 @@
                         plugins: {
                             title: {
                                 display: true,
-                                text: 'Innovation Metrics'
+                                text: 'Metrike inovacija'
                             },
                         },
                         scales: {
@@ -456,7 +456,7 @@
                                 beginAtZero: true,
                                 title: {
                                     display: true,
-                                    text: 'Score'
+                                    text: 'Rezultat'
                                 }
                             }
                         }
@@ -483,7 +483,7 @@
                         plugins: {
                             title: {
                                 display: true,
-                                text: 'Sustainability Score'
+                                text: 'Rezultat održivosti'
                             },
                             legend: {
                                 position: 'right',

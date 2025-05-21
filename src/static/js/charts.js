@@ -48,7 +48,7 @@ class GameCharts {
                         },
                         title: {
                             display: true,
-                            text: 'Market Share Distribution'
+                            text: 'Distribucija tržišnog udela'
                         }
                     }
                 }
@@ -64,22 +64,22 @@ class GameCharts {
                     labels: [],
                     datasets: [
                         {
-                            label: 'Financial',
+                            label: 'Finansijski',
                             backgroundColor: 'rgba(255, 99, 132, 0.7)',
                             data: []
                         },
                         {
-                            label: 'Market',
+                            label: 'Tržište',
                             backgroundColor: 'rgba(54, 162, 235, 0.7)',
                             data: []
                         },
                         {
-                            label: 'Innovation',
+                            label: 'Inovacije',
                             backgroundColor: 'rgba(255, 206, 86, 0.7)',
                             data: []
                         },
                         {
-                            label: 'Sustainability',
+                            label: 'Održivost',
                             backgroundColor: 'rgba(75, 192, 192, 0.7)',
                             data: []
                         }
@@ -91,7 +91,7 @@ class GameCharts {
                     plugins: {
                         title: {
                             display: true,
-                            text: 'Team Performance by Category'
+                            text: 'Učinak tima po kategorijama'
                         },
                         legend: {
                             position: 'top',
