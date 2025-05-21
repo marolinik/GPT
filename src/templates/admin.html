@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - StrategyMasters</title>
+    <title>Admin kontrolna tabla - StrategyMasters</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -12,12 +12,12 @@
     <div class="container-fluid dashboard-container">
         <div class="row mb-4">
             <div class="col-md-8">
-                <h1>StrategyMasters: The Smartphone Industry Challenge</h1>
-                <h3>Facilitator Dashboard</h3>
+                <h1>StrategyMasters: Izazov industrije pametnih telefona</h1>
+                <h3>Kontrolna tabla fasilitatora</h3>
             </div>
             <div class="col-md-4 text-end">
                 <div class="alert alert-primary" id="roundDisplay">
-                    Round 1 of 10
+                    Runda 1 od 10
                 </div>
             </div>
         </div>
@@ -26,15 +26,15 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header bg-success text-white">
-                        <h4>Game Control</h4>
+                        <h4>Kontrola igre</h4>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
-                                <button id="startRoundBtn" class="btn btn-success btn-lg w-100">Waiting for All Teams</button>
+                                <button id="startRoundBtn" class="btn btn-success btn-lg w-100">Čekanje na sve timove</button>
                             </div>
                             <div class="col-md-6">
-                                <button id="forceAdvanceBtn" class="btn btn-warning btn-lg w-100">Force Advance Round</button>
+                                <button id="forceAdvanceBtn" class="btn btn-warning btn-lg w-100">Forsiraj prelazak u sledeću rundu</button>
                             </div>
                         </div>
                     </div>
@@ -46,16 +46,16 @@
             <div class="col-md-12">
                 <ul class="nav nav-tabs" id="mainTabs" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="teams-tab" data-bs-toggle="tab" data-bs-target="#teams" type="button" role="tab" aria-controls="teams" aria-selected="true">Teams</button>
+                        <button class="nav-link active" id="teams-tab" data-bs-toggle="tab" data-bs-target="#teams" type="button" role="tab" aria-controls="teams" aria-selected="true">Timovi</button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="market-tab" data-bs-toggle="tab" data-bs-target="#market" type="button" role="tab" aria-controls="market" aria-selected="false">Market Overview</button>
+                        <button class="nav-link" id="market-tab" data-bs-toggle="tab" data-bs-target="#market" type="button" role="tab" aria-controls="market" aria-selected="false">Pregled tržišta</button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="events-tab" data-bs-toggle="tab" data-bs-target="#events" type="button" role="tab" aria-controls="events" aria-selected="false">Events</button>
+                        <button class="nav-link" id="events-tab" data-bs-toggle="tab" data-bs-target="#events" type="button" role="tab" aria-controls="events" aria-selected="false">Događaji</button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="rankings-tab" data-bs-toggle="tab" data-bs-target="#rankings" type="button" role="tab" aria-controls="rankings" aria-selected="false">Rankings</button>
+                        <button class="nav-link" id="rankings-tab" data-bs-toggle="tab" data-bs-target="#rankings" type="button" role="tab" aria-controls="rankings" aria-selected="false">Rangiranje</button>
                     </li>
                 </ul>
 
@@ -64,22 +64,22 @@
                     <div class="tab-pane fade show active" id="teams" role="tabpanel" aria-labelledby="teams-tab">
                         <div class="card">
                             <div class="card-body">
-                                <h4>Team Status</h4>
+                                <h4>Status timova</h4>
                                 <div class="table-responsive">
                                     <table class="table table-striped table-hover" id="teamsTable">
                                         <thead>
                                             <tr>
-                                                <th>Team ID</th>
-                                                <th>Company Name</th>
-                                                <th>Capital</th>
-                                                <th>Market Share</th>
-                                                <th>Score</th>
+                                                <th>ID tima</th>
+                                                <th>Naziv kompanije</th>
+                                                <th>Kapital</th>
+                                                <th>Tržišni udeo</th>
+                                                <th>Bodovi</th>
                                                 <th>Status</th>
                                             </tr>
                                         </thead>
                                         <tbody id="teamsTableBody">
                                             <tr>
-                                                <td colspan="6" class="text-center">Loading team data...</td>
+                                                <td colspan="6" class="text-center">Učitavanje podataka o timovima...</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -92,48 +92,48 @@
                     <div class="tab-pane fade" id="market" role="tabpanel" aria-labelledby="market-tab">
                         <div class="card">
                             <div class="card-body">
-                                <h4>Market Statistics</h4>
+                                <h4>Statistika tržišta</h4>
                                 <div class="row">
                                     <div class="col-md-3 col-sm-6">
                                         <div class="stat-card">
-                                            <div class="stat-value" id="marketSizeValue">10M units</div>
-                                            <div class="stat-label">Market Size</div>
+                                            <div class="stat-value" id="marketSizeValue">10M jedinica</div>
+                                            <div class="stat-label">Veličina tržišta</div>
                                         </div>
                                     </div>
                                     <div class="col-md-3 col-sm-6">
                                         <div class="stat-card">
                                             <div class="stat-value" id="marketGrowthValue">5.0%</div>
-                                            <div class="stat-label">Growth Rate</div>
+                                            <div class="stat-label">Stopa rasta</div>
                                         </div>
                                     </div>
                                     <div class="col-md-2 col-sm-4">
                                         <div class="stat-card">
                                             <div class="stat-value" id="premiumSizeValue">20.0%</div>
-                                            <div class="stat-label">Premium</div>
+                                            <div class="stat-label">Premijum</div>
                                         </div>
                                     </div>
                                     <div class="col-md-2 col-sm-4">
                                         <div class="stat-card">
                                             <div class="stat-value" id="mid_rangeSizeValue">50.0%</div>
-                                            <div class="stat-label">Mid-Range</div>
+                                            <div class="stat-label">Srednji opseg</div>
                                         </div>
                                     </div>
                                     <div class="col-md-2 col-sm-4">
                                         <div class="stat-card">
                                             <div class="stat-value" id="budgetSizeValue">30.0%</div>
-                                            <div class="stat-label">Budget</div>
+                                            <div class="stat-label">Budžet</div>
                                         </div>
                                     </div>
                                 </div>
                                 
-                                <h4 class="mt-4">Market Insights</h4>
+                                <h4 class="mt-4">Uvidi u tržište</h4>
                                 <div class="market-report">
                                     <ul class="list-group" id="marketInsights">
-                                        <li class="list-group-item">Loading market insights...</li>
+                                        <li class="list-group-item">Učitavanje uvida u tržište...</li>
                                     </ul>
                                 </div>
                                 
-                                <h4 class="mt-4">Market Visualization</h4>
+                                <h4 class="mt-4">Vizualizacija tržišta</h4>
                                 <div class="chart-container">
                                     <canvas id="marketShareChart"></canvas>
                                 </div>
@@ -145,9 +145,9 @@
                     <div class="tab-pane fade" id="events" role="tabpanel" aria-labelledby="events-tab">
                         <div class="card">
                             <div class="card-body">
-                                <h4>Current Round Events</h4>
+                                <h4>Događaji u trenutnoj rundi</h4>
                                 <div id="eventsList">
-                                    <div class="alert alert-info">No events for this round.</div>
+                                    <div class="alert alert-info">Nema događaja za ovu rundu.</div>
                                 </div>
                             </div>
                         </div>
@@ -157,29 +157,29 @@
                     <div class="tab-pane fade" id="rankings" role="tabpanel" aria-labelledby="rankings-tab">
                         <div class="card">
                             <div class="card-body">
-                                <h4>Current Rankings</h4>
+                                <h4>Trenutno rangiranje</h4>
                                 <div class="table-responsive">
                                     <table class="table table-striped table-hover">
                                         <thead>
                                             <tr>
-                                                <th>Rank</th>
-                                                <th>Company</th>
-                                                <th>Total Score</th>
-                                                <th>Financial</th>
-                                                <th>Market</th>
-                                                <th>Innovation</th>
-                                                <th>Sustainability</th>
+                                                <th>Rang</th>
+                                                <th>Kompanija</th>
+                                                <th>Ukupno bodova</th>
+                                                <th>Finansije</th>
+                                                <th>Tržište</th>
+                                                <th>Inovacije</th>
+                                                <th>Održivost</th>
                                             </tr>
                                         </thead>
                                         <tbody id="rankingsTableBody">
                                             <tr>
-                                                <td colspan="7" class="text-center">Loading rankings...</td>
+                                                <td colspan="7" class="text-center">Učitavanje rangiranja...</td>
                                             </tr>
                                         </tbody>
                                     </table>
                                 </div>
                                 
-                                <h4 class="mt-4">Score Visualization</h4>
+                                <h4 class="mt-4">Vizualizacija bodova</h4>
                                 <div class="chart-container">
                                     <canvas id="scoreChart"></canvas>
                                 </div>
@@ -194,32 +194,32 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header bg-info text-white">
-                        <h4>Facilitator Notes</h4>
+                        <h4>Beleške fasilitatora</h4>
                     </div>
                     <div class="card-body">
-                        <h5>Game Management</h5>
+                        <h5>Upravljanje igrom</h5>
                         <ul>
-                            <li>Use the "Start Next Round" button to advance the game when all teams have submitted decisions</li>
-                            <li>Use "Force Advance Round" only when necessary (e.g., if a team is unresponsive)</li>
-                            <li>Monitor team submissions and provide assistance as needed</li>
+                            <li>Koristite dugme "Započni sledeću rundu" da biste napredovali u igri kada svi timovi predaju odluke</li>
+                            <li>Koristite "Forsiraj prelazak u sledeću rundu" samo kada je neophodno (npr. ako tim ne reaguje)</li>
+                            <li>Pratite predaje timova i pružite pomoć po potrebi</li>
                         </ul>
                         
-                        <h5>Learning Objectives</h5>
+                        <h5>Ciljevi učenja</h5>
                         <ul>
-                            <li>Strategic Analysis: Teams should apply frameworks like Porter's Five Forces and SWOT</li>
-                            <li>Competitive Positioning: Teams should develop clear strategic positioning</li>
-                            <li>Resource Allocation: Teams should make trade-offs in resource allocation</li>
-                            <li>Market Adaptation: Teams should respond to changing market conditions</li>
-                            <li>Long-term Planning: Teams should balance short-term results with long-term sustainability</li>
+                            <li>Strateška analiza: Timovi treba da primenjuju okvire kao što su Porterovih pet sila i SWOT</li>
+                            <li>Konkurentsko pozicioniranje: Timovi treba da razviju jasno strateško pozicioniranje</li>
+                            <li>Alokacija resursa: Timovi treba da prave kompromise u alokaciji resursa</li>
+                            <li>Prilagođavanje tržištu: Timovi treba da odgovore na promenljive tržišne uslove</li>
+                            <li>Dugoročno planiranje: Timovi treba da balansiraju kratkoročne rezultate sa dugoročnom održivošću</li>
                         </ul>
                         
-                        <h5>Debrief Questions</h5>
+                        <h5>Pitanja za diskusiju</h5>
                         <ul>
-                            <li>What strategic frameworks did your team find most useful?</li>
-                            <li>How did your strategic positioning evolve over the course of the game?</li>
-                            <li>What were your most successful decisions? What would you do differently?</li>
-                            <li>How did you respond to strategic events and market changes?</li>
-                            <li>What connections can you draw between this simulation and real-world strategic management?</li>
+                            <li>Koje strateške okvire je vaš tim smatrao najkorisnijim?</li>
+                            <li>Kako se vaše strateško pozicioniranje razvijalo tokom igre?</li>
+                            <li>Koje su bile vaše najuspešnije odluke? Šta biste uradili drugačije?</li>
+                            <li>Kako ste odgovorili na strateške događaje i promene na tržištu?</li>
+                            <li>Koje veze možete povući između ove simulacije i strateškog upravljanja u stvarnom svetu?</li>
                         </ul>
                     </div>
                 </div>

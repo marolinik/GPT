@@ -67,7 +67,7 @@ class GameEngine {
                 console.error(`HTTP error! Status: ${response.status}, Url: ${url}`);
                 const errorText = await response.text();
                 console.error(`Error response: ${errorText}`);
-                throw new Error(`HTTP error! Status: ${response.status}, Response: ${errorText}`);
+                throw new Error(`HTTP greška! Status: ${response.status}, Odgovor: ${errorText}`);
             }
             
             const responseText = await response.text();
@@ -78,12 +78,12 @@ class GameEngine {
                 console.log('Game state data received:', data);
             } catch (e) {
                 console.error('Failed to parse JSON response:', responseText);
-                throw new Error('Invalid JSON response from server');
+                throw new Error('Nevažeći JSON odgovor sa servera');
             }
             
             if (!data || typeof data !== 'object') {
                 console.error('Invalid game state data:', data);
-                throw new Error('Invalid game state data received');
+                throw new Error('Primljeni nevažeći podaci o stanju igre');
             }
             
             // Store full game state data
@@ -102,14 +102,14 @@ class GameEngine {
                 this.updateUI();
             } catch (uiError) {
                 console.error('Error during UI update:', uiError);
-                this.showError('Error updating the UI. Details: ' + uiError.message);
+                this.showError('Greška pri ažuriranju korisničkog interfejsa. Detalji: ' + uiError.message);
             }
             
             return data;
         } catch (error) {
             console.error('Error fetching game state:', error);
             this.stopPolling(); // Stop polling to avoid repeated error messages
-            this.showError(`Failed to fetch game state. ${error.message}`);
+            this.showError(`Neuspešno preuzimanje stanja igre. ${error.message}`);
             return null;
         }
     }
@@ -174,7 +174,7 @@ class GameEngine {
                 if (this.hasSubmitted) {
                     e.preventDefault();
                     e.target.checked = !e.target.checked; // Revert the change
-                    this.showError('Cannot change decisions after submission for this round.');
+                    this.showError('Odluke se ne mogu menjati nakon potvrde za ovu rundu.');
                     return;
                 }
                 
@@ -262,7 +262,7 @@ class GameEngine {
                 if (this.hasSubmitted) {
                     e.preventDefault();
                     e.target.value = this.gameState.company.products[segment]?.[field] || e.target.defaultValue;
-                    this.showError('Cannot change decisions after submission for this round.');
+                    this.showError('Odluke se ne mogu menjati nakon potvrde za ovu rundu.');
                     return;
                 }
                 
@@ -335,7 +335,7 @@ class GameEngine {
     
     updateUI() {
         // Common UI updates
-        document.getElementById('roundDisplay').textContent = `Round ${this.currentRound} of ${this.totalRounds}`;
+        document.getElementById('roundDisplay').textContent = `Runda ${this.currentRound} od ${this.totalRounds}`;
         
         // Handle potential errors that might occur during UI updates
         try {
@@ -346,7 +346,7 @@ class GameEngine {
             }
         } catch (error) {
             console.error('Error updating UI:', error);
-            this.showError('Error updating the game display. Please reload the page.');
+            this.showError('Greška pri prikazivanju igre. Osvežite stranicu.');
         }
     }
     
@@ -355,7 +355,7 @@ class GameEngine {
             // Safeguard against missing data
             if (!this.gameState) {
                 console.error('No game state available for UI update');
-                this.showError('Game state unavailable. Please reload the page.');
+                this.showError('Stanje igre nedostupno. Osvežite stranicu.');
                 return;
             }
             
@@ -373,7 +373,7 @@ class GameEngine {
             if (!this.gameState.teams) {
                 console.error('Missing teams data in game state:', this.gameState);
                 const row = document.createElement('tr');
-                row.innerHTML = `<td colspan="6" class="text-center">Error loading team data</td>`;
+                row.innerHTML = `<td colspan="6" class="text-center">Greška pri učitavanju podataka o timu</td>`;
                 teamsBody.appendChild(row);
                 return;
             }
@@ -418,8 +418,8 @@ class GameEngine {
                     <td>${(marketShare * 100).toFixed(1)}%</td>
                     <td>${score.toFixed(1)}</td>
                     <td>${hasSubmitted ? 
-                        '<span class="badge bg-success">Submitted</span>' : 
-                        '<span class="badge bg-warning">Pending</span>'}</td>
+                        '<span class="badge bg-success">Potvrđeno</span>' : 
+                        '<span class="badge bg-warning">Na čekanju</span>'}</td>
                 `;
                 
                 teamsBody.appendChild(row);
@@ -441,8 +441,8 @@ class GameEngine {
             if (this.isFinished) {
                 startRoundBtn.disabled = true;
                 forceAdvanceBtn.disabled = true;
-                startRoundBtn.textContent = 'Game Finished';
-                forceAdvanceBtn.textContent = 'Game Finished';
+                startRoundBtn.textContent = 'Igra završena';
+                forceAdvanceBtn.textContent = 'Igra završena';
                 
                 if (startRoundContainer) startRoundContainer.classList.add('btn-secondary');
                 if (forceAdvanceContainer) forceAdvanceContainer.classList.add('btn-secondary');
@@ -453,7 +453,7 @@ class GameEngine {
                 startRoundBtn.disabled = !allSubmitted;
                 
                 if (allSubmitted) {
-                    startRoundBtn.textContent = 'Start Next Round';
+                    startRoundBtn.textContent = 'Započni sledeću rundu';
                     startRoundBtn.classList.remove('btn-secondary');
                     startRoundBtn.classList.add('btn-success');
                     
@@ -462,7 +462,7 @@ class GameEngine {
                         startRoundContainer.classList.add('bg-success');
                     }
                 } else {
-                    startRoundBtn.textContent = `Waiting for Teams (${submissions.length}/${teamIds.length})`;
+                    startRoundBtn.textContent = `Čeka se na timove (${submissions.length}/${teamIds.length})`;
                     startRoundBtn.classList.remove('btn-success');
                     startRoundBtn.classList.add('btn-secondary');
                     
@@ -474,7 +474,7 @@ class GameEngine {
                 
                 // Update the Force Advance button
                 forceAdvanceBtn.disabled = false;
-                forceAdvanceBtn.textContent = 'Force Advance to Round ' + (this.currentRound + 1);
+                forceAdvanceBtn.textContent = 'Primoraj prelazak na rundu ' + (this.currentRound + 1);
                 
                 if (forceAdvanceContainer) {
                     forceAdvanceContainer.classList.add('bg-warning');
@@ -484,18 +484,18 @@ class GameEngine {
             // Update round display
             const roundDisplay = document.getElementById('roundDisplay');
             if (roundDisplay) {
-                roundDisplay.textContent = `Round ${this.currentRound} of ${this.totalRounds}`;
+                roundDisplay.textContent = `Runda ${this.currentRound} od ${this.totalRounds}`;
                 roundDisplay.classList.remove('alert-warning', 'alert-danger', 'alert-success');
                 
                 if (this.isFinished) {
                     roundDisplay.classList.add('alert-success');
-                    roundDisplay.textContent += ' (Game Complete)';
+                    roundDisplay.textContent += ' (Igra završena)';
                 } else if (allSubmitted) {
                     roundDisplay.classList.add('alert-success');
-                    roundDisplay.textContent += ' (Ready to Advance)';
+                    roundDisplay.textContent += ' (Spremno za napredak)';
                 } else {
                     roundDisplay.classList.add('alert-warning');
-                    roundDisplay.textContent += ` (${submissions.length}/${teamIds.length} Submitted)`;
+                    roundDisplay.textContent += ` (${submissions.length}/${teamIds.length} Potvrđeno)`;
                 }
             }
             
@@ -519,7 +519,7 @@ class GameEngine {
             }
         } catch (error) {
             console.error('Error in updateAdminUI:', error);
-            this.showError('Error updating the game display. Please reload the page.');
+            this.showError('Greška pri prikazivanju igre. Osvežite stranicu.');
         }
     }
     
@@ -546,7 +546,7 @@ class GameEngine {
         
         if (this.hasSubmitted) {
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Decisions Submitted for Round ' + this.currentRound;
+            submitBtn.textContent = 'Odluke potvrđene za rundu ' + this.currentRound;
             decisionForm.classList.add('decision-submitted');
             
             // Disable all form inputs when submitted
@@ -555,7 +555,7 @@ class GameEngine {
             });
         } else {
             submitBtn.disabled = false;
-            submitBtn.textContent = 'Submit Decisions for Round ' + this.currentRound;
+            submitBtn.textContent = 'Potvrdi odluke za rundu ' + this.currentRound;
             decisionForm.classList.remove('decision-submitted');
             
             // Enable all form inputs when not submitted
@@ -626,7 +626,7 @@ class GameEngine {
         // Update market overview section for both admin and team views
         const market = this.gameState.market;
         
-        document.getElementById('marketSizeValue').textContent = `${Math.round(market.total_market_size / 1000000)}M units`;
+        document.getElementById('marketSizeValue').textContent = `${Math.round(market.total_market_size / 1000000)}M jedinica`;
         document.getElementById('marketGrowthValue').textContent = `${(market.market_growth_rate * 100).toFixed(1)}%`;
         
         // Update segment sizes
@@ -663,7 +663,7 @@ class GameEngine {
             if (events.length === 0) {
                 const noEvents = document.createElement('div');
                 noEvents.className = 'alert alert-info';
-                noEvents.textContent = 'No events for this round.';
+                noEvents.textContent = 'Nema događaja za ovu rundu.';
                 eventsList.appendChild(noEvents);
             } else {
                 events.forEach(event => {
@@ -699,10 +699,10 @@ class GameEngine {
                     <div class="card-body">
                         <div class="row">
                             <div class="col-6">
-                                <p><strong>Market Share:</strong> ${(competitor.market_share * 100).toFixed(1)}%</p>
+                                <p><strong>Tržišni udeo:</strong> ${(competitor.market_share * 100).toFixed(1)}%</p>
                             </div>
                             <div class="col-6">
-                                <p><strong>Brand Strength:</strong> ${competitor.brand_strength.toFixed(1)}</p>
+                                <p><strong>Snaga brenda:</strong> ${competitor.brand_strength.toFixed(1)}</p>
                             </div>
                         </div>
                     </div>
@@ -724,33 +724,33 @@ class GameEngine {
             resultsCard.className = 'card mb-3';
             resultsCard.innerHTML = `
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Previous Round Results</h5>
+                    <h5 class="mb-0">Rezultati prethodne runde</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <h6>Financial Results</h6>
-                            <p><strong>Revenue:</strong> $${Math.round(results.company_state.financial.revenue / 1000000)}M</p>
-                            <p><strong>Costs:</strong> $${Math.round(results.company_state.financial.costs / 1000000)}M</p>
+                            <h6>Finansijski rezultati</h6>
+                            <p><strong>Prihod:</strong> $${Math.round(results.company_state.financial.revenue / 1000000)}M</p>
+                            <p><strong>Troškovi:</strong> $${Math.round(results.company_state.financial.costs / 1000000)}M</p>
                             <p><strong>Profit:</strong> $${Math.round(results.company_state.financial.profit / 1000000)}M</p>
-                            <p><strong>Profit Margin:</strong> ${results.company_state.financial.profit_margin.toFixed(1)}%</p>
+                            <p><strong>Profitna marža:</strong> ${results.company_state.financial.profit_margin.toFixed(1)}%</p>
                         </div>
                         <div class="col-md-6">
-                            <h6>Market Results</h6>
-                            <p><strong>Market Share:</strong> ${(results.company_state.market.market_share * 100).toFixed(1)}%</p>
-                            <p><strong>Customer Satisfaction:</strong> ${results.company_state.market.customer_satisfaction.toFixed(1)}</p>
+                            <h6>Tržišni rezultati</h6>
+                            <p><strong>Tržišni udeo:</strong> ${(results.company_state.market.market_share * 100).toFixed(1)}%</p>
+                            <p><strong>Zadovoljstvo kupaca:</strong> ${results.company_state.market.customer_satisfaction.toFixed(1)}</p>
                         </div>
                     </div>
                     
-                    <h6 class="mt-3">Sales by Segment</h6>
+                    <h6 class="mt-3">Prodaja po segmentima</h6>
                     <div class="table-responsive">
                         <table class="table table-sm">
                             <thead>
                                 <tr>
                                     <th>Segment</th>
-                                    <th>Units Sold</th>
-                                    <th>Revenue</th>
-                                    <th>Market Share</th>
+                                    <th>Prodatih jedinica</th>
+                                    <th>Prihod</th>
+                                    <th>Tržišni udeo</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -798,7 +798,7 @@ class GameEngine {
                     }
                 })
                 .catch(error => {
-                    console.error('Error fetching rankings:', error);
+                    console.error('Greška pri dohvatanju rangiranja:', error);
                 });
         }
     }
@@ -822,7 +822,7 @@ class GameEngine {
             });
             
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+                throw new Error(`HTTP greška! Status: ${response.status}`);
             }
             
             const result = await response.json();
@@ -831,20 +831,20 @@ class GameEngine {
                 // Update UI to reflect submission
                 this.hasSubmitted = true;
                 document.getElementById('submitDecisionsBtn').disabled = true;
-                document.getElementById('submitDecisionsBtn').textContent = 'Decisions Submitted';
+                document.getElementById('submitDecisionsBtn').textContent = 'Odluke potvrđene';
                 document.getElementById('decisionForm').classList.add('decision-submitted');
                 
                 // Show success message
-                this.showSuccess('Decisions submitted successfully! Waiting for other teams and next round.');
+                this.showSuccess('Odluke uspešno potvrđene! Čeka se na ostale timove i sledeću rundu.');
                 
                 // Refresh game state
                 await this.fetchGameState();
             } else {
-                throw new Error(result.error || 'Unknown error');
+                throw new Error(result.error || 'Nepoznata greška');
             }
         } catch (error) {
             console.error('Error submitting decisions:', error);
-            this.showError(`Failed to submit decisions: ${error.message}`);
+            this.showError(`Neuspešno potvrđivanje odluka: ${error.message}`);
         } finally {
             // Hide loading indicator
             this.hideLoading();
@@ -880,25 +880,25 @@ class GameEngine {
             try {
                 result = JSON.parse(responseText);
             } catch (e) {
-                throw new Error(`Invalid JSON response: ${responseText}`);
+                throw new Error(`Nevažeći JSON odgovor: ${responseText}`);
             }
             
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}, Message: ${result.error || 'Unknown error'}`);
+                throw new Error(`HTTP greška! Status: ${response.status}, Poruka: ${result.error || 'Nepoznata greška'}`);
             }
             
             if (result.success) {
                 // Show success message
-                this.showSuccess(`Advanced to round ${result.round || result.current_round || 'next'}`);
+                this.showSuccess(`Napredovano u rundu ${result.round || result.current_round || 'sledeću'}`);
                 
                 // Refresh game state
                 await this.fetchGameState();
             } else {
-                throw new Error(result.error || 'Unknown error');
+                throw new Error(result.error || 'Nepoznata greška');
             }
         } catch (error) {
             console.error('Error starting new round:', error);
-            this.showError(`Failed to start new round: ${error.message}`);
+            this.showError(`Neuspešno započinjanje nove runde: ${error.message}`);
         } finally {
             // Hide loading indicator
             this.hideLoading();
@@ -911,7 +911,7 @@ class GameEngine {
             return;
         }
         
-        if (!confirm(`Are you sure you want to force advance to round ${this.currentRound + 1}? Any teams that have not submitted decisions will miss their turn.`)) {
+        if (!confirm(`Da li ste sigurni da želite da primorate prelazak na rundu ${this.currentRound + 1}? Timovi koji nisu potvrdili odluke će propustiti svoj red.`)) {
             return;
         }
         
@@ -938,25 +938,25 @@ class GameEngine {
             try {
                 result = JSON.parse(responseText);
             } catch (e) {
-                throw new Error(`Invalid JSON response: ${responseText}`);
+                throw new Error(`Nevažeći JSON odgovor: ${responseText}`);
             }
             
             if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}, Message: ${result.error || 'Unknown error'}`);
+                throw new Error(`HTTP greška! Status: ${response.status}, Poruka: ${result.error || 'Nepoznata greška'}`);
             }
             
             if (result.success) {
                 // Show success message
-                this.showSuccess(`Forced advance to round ${result.round || result.current_round || 'next'}`);
+                this.showSuccess(`Primoran prelazak na rundu ${result.round || result.current_round || 'sledeću'}`);
                 
                 // Refresh game state
                 await this.fetchGameState();
             } else {
-                throw new Error(result.error || 'Unknown error');
+                throw new Error(result.error || 'Nepoznata greška');
             }
         } catch (error) {
             console.error('Error forcing round advance:', error);
-            this.showError(`Failed to force round advance: ${error.message}`);
+            this.showError(`Neuspešno primoravanje prelaska na rundu: ${error.message}`);
         } finally {
             // Hide loading indicator
             this.hideLoading();
@@ -974,9 +974,9 @@ class GameEngine {
             loadingOverlay.innerHTML = `
                 <div class="spinner-container">
                     <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
-                        <span class="visually-hidden">Loading...</span>
+                        <span class="visually-hidden">Učitavanje...</span>
                     </div>
-                    <p class="mt-2">Processing...</p>
+                    <p class="mt-2">Obrađivanje...</p>
                 </div>
             `;
             document.body.appendChild(loadingOverlay);
@@ -1028,7 +1028,7 @@ class GameEngine {
                 <div class="toast-body">
                     ${message}
                 </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Zatvori"></button>
             </div>
         `;
         
@@ -1073,6 +1073,6 @@ document.addEventListener('DOMContentLoaded', function() {
         window.gameEngine = new GameEngine(gameId, role, id, accessCode);
     } else {
         console.error('Missing required parameters');
-        alert('Missing required parameters. Please check the URL and try again.');
+        alert('Nedostaju obavezni parametri. Proverite URL i pokušajte ponovo.');
     }
 });
