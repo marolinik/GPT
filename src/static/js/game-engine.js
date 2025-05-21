@@ -18,7 +18,19 @@ class GameEngine {
         this.isFinished = false;
         
         // Decision tracking
-        this.currentDecisions = {};
+        this.currentDecisions = { // Initialize with the full new structure
+            products: {
+                premium: { active: true, price: 0, quality: 0, features: 0, production_volume: 0, marketing_budget: 0 },
+                mid_range: { active: true, price: 0, quality: 0, features: 0, production_volume: 0, marketing_budget: 0 },
+                budget: { active: true, price: 0, quality: 0, features: 0, production_volume: 0, marketing_budget: 0 }
+            },
+            r_d: {
+                budget: 0,
+                focus: { camera: 0, battery: 0, processor: 0, display: 0, software: 0 }
+            },
+            operations: { capacity_investment: 0, quality_investment: 0 },
+            corporate: { brand_investment: 0, sustainability_investment: 0, csr_investment: 0, employee_investment: 0 }
+        };
         this.hasSubmitted = false;
         
         // Polling
@@ -181,126 +193,76 @@ class GameEngine {
                 const segmentId = e.target.getAttribute('data-segment');
                 const isActive = e.target.checked;
                 
-                // Update UI to show/hide segment details
                 const segmentDetails = document.querySelector(`.segment-details[data-segment="${segmentId}"]`);
                 if (segmentDetails) {
                     segmentDetails.style.display = isActive ? 'block' : 'none';
                 }
                 
-                // Update current decisions immediately
-                if (!this.currentDecisions.products) {
-                    this.currentDecisions.products = {};
-                }
-                
-                // Make sure we preserve existing values when toggling
+                // Ensure product segment exists in currentDecisions
                 if (!this.currentDecisions.products[segmentId]) {
-                    const product = this.gameState.company.products[segmentId];
-                    this.currentDecisions.products[segmentId] = {
-                        active: isActive,
-                        price: product.price,
-                        quality: product.quality,
-                        features: product.features,
-                        production_volume: product.production_volume,
-                        marketing_budget: product.marketing_budget
-                    };
+                    // If not, initialize from gameState or defaults (already handled by initial currentDecisions structure)
+                    // This part might need refinement if gameState.company.products isn't immediately available
+                    // For now, relying on the pre-initialized structure of this.currentDecisions
+                     this.currentDecisions.products[segmentId] = { 
+                        ...this.currentDecisions.products[segmentId], // spread existing defaults
+                        active: isActive 
+                    }; 
                 } else {
                     this.currentDecisions.products[segmentId].active = isActive;
                 }
                 
                 console.log(`Segment ${segmentId} active state changed to: ${isActive}`);
-                console.log('Current decisions:', this.currentDecisions);
+                console.log('Current decisions:', JSON.stringify(this.currentDecisions, null, 2));
             });
         });
         
         // Setup numeric input handlers with improved error handling
         document.querySelectorAll('input[type="number"]').forEach(input => {
-            // Set initial value in currentDecisions
-            const category = input.getAttribute('data-category');
-            const field = input.getAttribute('data-field');
-            
-            if (!field || !category) return; // Skip if missing attributes
-            
-            const value = parseFloat(input.value) || 0;
-            
-            if (category === 'product') {
-                const segment = input.getAttribute('data-segment');
-                if (!segment) return;
-                
-                if (!this.currentDecisions.products) {
-                    this.currentDecisions.products = {};
-                }
-                
-                if (!this.currentDecisions.products[segment]) {
-                    const product = this.gameState.company.products[segment];
-                    if (product) {
-                        this.currentDecisions.products[segment] = {
-                            active: product.active,
-                            price: product.price,
-                            quality: product.quality,
-                            features: product.features,
-                            production_volume: product.production_volume,
-                            marketing_budget: product.marketing_budget
-                        };
-                    } else {
-                        this.currentDecisions.products[segment] = {
-                            active: true
-                        };
-                    }
-                }
-                
-                this.currentDecisions.products[segment][field] = value;
-            } else if (category === 'strategy') {
-                if (!this.currentDecisions.strategy) {
-                    this.currentDecisions.strategy = {};
-                }
-                
-                this.currentDecisions.strategy[field] = value;
-            }
-            
-            // Add event listener for changes
+            // Initial population of this.currentDecisions from form defaults OR gameState will be handled by updateTeamUI
+            // Here, we just set up the change listeners.
+
             input.addEventListener('change', (e) => {
                 if (this.hasSubmitted) {
-                    e.preventDefault();
-                    e.target.value = this.gameState.company.products[segment]?.[field] || e.target.defaultValue;
+                    // Attempt to restore previous value if submission has occurred
+                    // This part is tricky as the "original" value needs to be sourced correctly
+                    // For simplicity, we just show an error and prevent change. A better UX would revert.
+                    e.preventDefault(); 
                     this.showError('Cannot change decisions after submission for this round.');
+                    // To revert, you'd need to store the pre-change value or re-fetch from gameState.
+                    // e.g., e.target.value = previousValue; 
                     return;
                 }
                 
                 const category = e.target.getAttribute('data-category');
                 const field = e.target.getAttribute('data-field');
-                const value = parseFloat(e.target.value) || 0;
+                const value = parseFloat(e.target.value) || 0; // Ensure numeric conversion
                 
+                if (!category || !field) return;
+
                 if (category === 'product') {
                     const segment = e.target.getAttribute('data-segment');
-                    
-                    if (!this.currentDecisions.products) {
-                        this.currentDecisions.products = {};
-                    }
-                    
+                    if (!segment) return;
+                    // Ensure segment and product structures exist
                     if (!this.currentDecisions.products[segment]) {
-                        const product = this.gameState.company.products[segment];
-                        this.currentDecisions.products[segment] = {
-                            active: product.active,
-                            price: product.price,
-                            quality: product.quality,
-                            features: product.features, 
-                            production_volume: product.production_volume,
-                            marketing_budget: product.marketing_budget
-                        };
+                        this.currentDecisions.products[segment] = { active: true, price: 0, quality: 0, features: 0, production_volume: 0, marketing_budget: 0 };
                     }
-                    
                     this.currentDecisions.products[segment][field] = value;
-                    console.log(`Updated ${segment} ${field} to ${value}`);
-                } else if (category === 'strategy') {
-                    if (!this.currentDecisions.strategy) {
-                        this.currentDecisions.strategy = {};
+                } else if (category === 'r_d') { // For rdBudget (data-category="r_d", data-field="budget")
+                    this.currentDecisions.r_d[field] = value;
+                } else if (category === 'r_d_focus') { // For rdFocusCamera etc. (data-category="r_d_focus", data-field="camera")
+                    // Ensure r_d.focus structure exists
+                    if (!this.currentDecisions.r_d.focus) {
+                        this.currentDecisions.r_d.focus = { camera: 0, battery: 0, processor: 0, display: 0, software: 0 };
                     }
-                    
-                    this.currentDecisions.strategy[field] = value;
-                    console.log(`Updated strategy ${field} to ${value}`);
+                    this.currentDecisions.r_d.focus[field] = value;
+                } else if (category === 'operations') { // data-category="operations"
+                    this.currentDecisions.operations[field] = value;
+                } else if (category === 'corporate') { // data-category="corporate"
+                    this.currentDecisions.corporate[field] = value;
                 }
                 
-                console.log('Current decisions:', this.currentDecisions);
+                console.log(`Updated ${category}.${field} (segment: ${e.target.getAttribute('data-segment') || 'N/A'}) to ${value}`);
+                console.log('Current decisions:', JSON.stringify(this.currentDecisions, null, 2)); // For debugging
             });
         });
         
@@ -565,45 +527,120 @@ class GameEngine {
         }
         
         // Update product segments with current values from state
-        for (const [segment, product] of Object.entries(company.products)) {
-            const segmentToggle = document.querySelector(`.segment-toggle[data-segment="${segment}"]`);
-            const segmentDetails = document.querySelector(`.segment-details[data-segment="${segment}"]`);
+        // Also, initialize this.currentDecisions with these values if not already set by a more recent interaction.
+        for (const [segmentKey, productData] of Object.entries(company.products)) {
+            const segmentToggle = document.querySelector(`.segment-toggle[data-segment="${segmentKey}"]`);
+            const segmentDetails = document.querySelector(`.segment-details[data-segment="${segmentKey}"]`);
             
             if (segmentToggle && segmentDetails) {
-                // Update toggle state
-                segmentToggle.checked = product.active;
+                segmentToggle.checked = productData.active;
+                segmentDetails.style.display = productData.active ? 'block' : 'none';
+
+                // Populate form fields and this.currentDecisions.products[segmentKey]
+                // This ensures that if currentDecisions was just initialized with zeros, it gets actual values.
+                // If currentDecisions already has values (e.g. from user input), this won't overwrite them unless hasSubmitted is false.
+                // The event listeners in setupTeamUI handle updating currentDecisions on user input.
+                // This block primarily ensures the form VISUALLY reflects the gameState.
                 
-                // Show/hide segment details
-                segmentDetails.style.display = product.active ? 'block' : 'none';
-                
-                // Update product fields with current values
-                const priceInput = document.querySelector(`input[data-category="product"][data-segment="${segment}"][data-field="price"]`);
-                const qualityInput = document.querySelector(`input[data-category="product"][data-segment="${segment}"][data-field="quality"]`);
-                const featuresInput = document.querySelector(`input[data-category="product"][data-segment="${segment}"][data-field="features"]`);
-                const volumeInput = document.querySelector(`input[data-category="product"][data-segment="${segment}"][data-field="production_volume"]`);
-                const marketingInput = document.querySelector(`input[data-category="product"][data-segment="${segment}"][data-field="marketing_budget"]`);
-                
-                if (priceInput) priceInput.value = product.price;
-                if (qualityInput) qualityInput.value = product.quality;
-                if (featuresInput) featuresInput.value = product.features;
-                if (volumeInput) volumeInput.value = product.production_volume;
-                if (marketingInput) marketingInput.value = product.marketing_budget;
-                
-                // Ensure segment is reflected in currentDecisions
-                if (!this.currentDecisions.products) {
-                    this.currentDecisions.products = {};
-                }
-                
-                if (!this.currentDecisions.products[segment]) {
-                    this.currentDecisions.products[segment] = {
-                        active: product.active,
-                        price: product.price,
-                        quality: product.quality,
-                        features: product.features,
-                        production_volume: product.production_volume,
-                        marketing_budget: product.marketing_budget
+                // Product fields
+                document.querySelector(`input[data-category="product"][data-segment="${segmentKey}"][data-field="price"]`).value = productData.price;
+                document.querySelector(`input[data-category="product"][data-segment="${segmentKey}"][data-field="quality"]`).value = productData.quality;
+                document.querySelector(`input[data-category="product"][data-segment="${segmentKey}"][data-field="features"]`).value = productData.features;
+                document.querySelector(`input[data-category="product"][data-segment="${segmentKey}"][data-field="production_volume"]`).value = productData.production_volume;
+                document.querySelector(`input[data-category="product"][data-segment="${segmentKey}"][data-field="marketing_budget"]`).value = productData.marketing_budget; // Full value
+
+                // Initialize/update currentDecisions for products if not already done or if not submitted
+                // This logic should be careful not to overwrite fresh user input.
+                // The primary update of currentDecisions happens in the event listeners.
+                // Here, we're aligning the initial state of currentDecisions if it's still default.
+                if (!this.hasSubmitted) { // Only populate if decisions are not final
+                    this.currentDecisions.products[segmentKey] = {
+                        active: productData.active,
+                        price: parseFloat(productData.price),
+                        quality: parseFloat(productData.quality),
+                        features: parseFloat(productData.features),
+                        production_volume: parseFloat(productData.production_volume),
+                        marketing_budget: parseFloat(productData.marketing_budget)
                     };
                 }
+            }
+        }
+
+        // Populate R&D, Operations, Corporate strategy fields
+        // These values should come from the company's current state (end of last round or initial)
+        // or from decisions_history if a decision for the current round was already made.
+        // For simplicity, we'll assume `company` object reflects the state to populate from.
+        // A more sophisticated approach would check `decisions_history[this.currentRound]`.
+
+        if (!this.hasSubmitted) { // Only populate if decisions are not final
+            // R&D
+            if (company.r_d) { // Assuming r_d structure exists in company state
+                document.getElementById('rdBudget').value = company.r_d.budget || 0;
+                this.currentDecisions.r_d.budget = parseFloat(company.r_d.budget || 0);
+                if (company.r_d.focus) {
+                    for (const [focusArea, value] of Object.entries(company.r_d.focus)) {
+                        const inputEl = document.getElementById(`rdFocus${focusArea.charAt(0).toUpperCase() + focusArea.slice(1)}`);
+                        if (inputEl) inputEl.value = value;
+                        this.currentDecisions.r_d.focus[focusArea] = parseFloat(value || 0);
+                    }
+                }
+            } else { // Default if not in company state (e.g. first round)
+                 document.getElementById('rdBudget').value = this.currentDecisions.r_d.budget; // Use initialized default
+                 for (const [focusArea, value] of Object.entries(this.currentDecisions.r_d.focus)) {
+                        const inputEl = document.getElementById(`rdFocus${focusArea.charAt(0).toUpperCase() + focusArea.slice(1)}`);
+                        if (inputEl) inputEl.value = value; // Use initialized default
+                 }
+            }
+
+            // Operations
+            if (company.operations) {
+                document.getElementById('opsCapacityInvestment').value = company.operations.capacity_investment || 0;
+                document.getElementById('opsQualityInvestment').value = company.operations.quality_investment || 0;
+                this.currentDecisions.operations.capacity_investment = parseFloat(company.operations.capacity_investment || 0);
+                this.currentDecisions.operations.quality_investment = parseFloat(company.operations.quality_investment || 0);
+            } else {
+                document.getElementById('opsCapacityInvestment').value = this.currentDecisions.operations.capacity_investment;
+                document.getElementById('opsQualityInvestment').value = this.currentDecisions.operations.quality_investment;
+            }
+
+            // Corporate Strategy
+            if (company.corporate) {
+                document.getElementById('corpBrandInvestment').value = company.corporate.brand_investment || 0;
+                document.getElementById('corpSustainabilityInvestment').value = company.corporate.sustainability_investment || 0;
+                document.getElementById('corpCsrInvestment').value = company.corporate.csr_investment || 0;
+                document.getElementById('corpEmployeeInvestment').value = company.corporate.employee_investment || 0;
+
+                this.currentDecisions.corporate.brand_investment = parseFloat(company.corporate.brand_investment || 0);
+                this.currentDecisions.corporate.sustainability_investment = parseFloat(company.corporate.sustainability_investment || 0);
+                this.currentDecisions.corporate.csr_investment = parseFloat(company.corporate.csr_investment || 0);
+                this.currentDecisions.corporate.employee_investment = parseFloat(company.corporate.employee_investment || 0);
+            } else {
+                 document.getElementById('corpBrandInvestment').value = this.currentDecisions.corporate.brand_investment;
+                 document.getElementById('corpSustainabilityInvestment').value = this.currentDecisions.corporate.sustainability_investment;
+                 document.getElementById('corpCsrInvestment').value = this.currentDecisions.corporate.csr_investment;
+                 document.getElementById('corpEmployeeInvestment').value = this.currentDecisions.corporate.employee_investment;
+            }
+        } else {
+            // If submitted, populate form from company.decisions_history[this.currentRound] if available
+            // This ensures that after submission, the form shows the submitted values, not editable ones.
+            // This logic requires that `decisions_history` has the same structure as `currentDecisions`.
+            const submittedDecisions = company.decisions_history ? company.decisions_history[this.currentRound.toString()] : null;
+            if (submittedDecisions) {
+                 // Products (already handled by the loop above and input disabling)
+                 // R&D
+                 document.getElementById('rdBudget').value = submittedDecisions.r_d.budget;
+                 for (const [focusArea, value] of Object.entries(submittedDecisions.r_d.focus)) {
+                    const inputEl = document.getElementById(`rdFocus${focusArea.charAt(0).toUpperCase() + focusArea.slice(1)}`);
+                    if (inputEl) inputEl.value = value;
+                 }
+                 // Operations
+                 document.getElementById('opsCapacityInvestment').value = submittedDecisions.operations.capacity_investment;
+                 document.getElementById('opsQualityInvestment').value = submittedDecisions.operations.quality_investment;
+                 // Corporate
+                 document.getElementById('corpBrandInvestment').value = submittedDecisions.corporate.brand_investment;
+                 document.getElementById('corpSustainabilityInvestment').value = submittedDecisions.corporate.sustainability_investment;
+                 document.getElementById('corpCsrInvestment').value = submittedDecisions.corporate.csr_investment;
+                 document.getElementById('corpEmployeeInvestment').value = submittedDecisions.corporate.employee_investment;
             }
         }
         

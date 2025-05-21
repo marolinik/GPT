@@ -10,6 +10,7 @@ import sys
 import tempfile
 import shutil
 from datetime import datetime
+from unittest import mock
 
 # Add the parent directory to the path so we can import the application modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -43,10 +44,22 @@ class TestGameFunctionality(unittest.TestCase):
         # Note: For true persistence isolation in API tests, the game_state_manager
         # used by flask_app would need to be configured to use a temp directory.
         # This current setup for API tests will use the default persistence path.
+
+        # Setup mock for game_state_manager for API tests
+        self.api_test_storage = FilePickleStorage(storage_dir=self.temp_dir)
+        self.api_test_gsm = GameStateManager(storage=self.api_test_storage)
+        # The object to patch is where it's looked up.
+        # main.py (and thus flask_app) imports game_state_manager from models.file_pickle_persistence
+        self.patcher = mock.patch('models.file_pickle_persistence.game_state_manager', self.api_test_gsm)
+        self.mock_gsm = self.patcher.start()
+
         self.client = flask_app.test_client()
         
     def tearDown(self):
         """Clean up after tests"""
+        # Stop the patcher
+        self.patcher.stop()
+        
         # Remove the temporary directory
         shutil.rmtree(self.temp_dir)
         
@@ -89,9 +102,19 @@ class TestGameFunctionality(unittest.TestCase):
         initial_environmental_impact = team.environmental_impact
         initial_csr_rating = team.csr_rating # Assuming it's initialized
         initial_premium_price = team.products["premium"]["price"]
+        initial_innovation_index = team.innovation_index
+        initial_production_capacity = team.production_capacity
+        initial_quality_control = team.quality_control
+        initial_employee_satisfaction = team.employee_satisfaction
+
 
         # Create decisions with corrected structure and amounts for testing
-        # Total explicit costs here: Marketing (25M+15M) + R&D (30M) + Corp (20M+10M+5M) = 105M
+        # Total explicit costs:
+        # Products: Premium Marketing (25M) + Budget Marketing (15M) = 40M
+        # R&D: Budget (30M) = 30M (focus allocation doesn't add to cost here)
+        # Operations: Capacity (15M) + Quality (7M) = 22M
+        # Corporate: Brand (20M) + Sustainability (10M) + CSR (5M) + Employee (6M) = 41M
+        # Total = 40M + 30M + 22M + 41M = 133M
         decisions = {
             "products": {
                 "premium": {
@@ -114,13 +137,25 @@ class TestGameFunctionality(unittest.TestCase):
                     "marketing_budget": 15000000
                 }
             },
-            "r_d": { # Corrected structure for R&D decisions
-                "budget": 30000000 
+            "r_d": { 
+                "budget": 30000000,
+                "focus": { # R&D Focus allocations
+                    "camera": 20,
+                    "battery": 30,
+                    "processor": 25,
+                    "display": 15,
+                    "software": 10
+                }
             },
-            "corporate": { # Corrected structure for corporate strategy decisions
+            "operations": { # Operations decisions
+                "capacity_investment": 15000000,
+                "quality_investment": 7000000
+            },
+            "corporate": { 
                 "brand_investment": 20000000,
                 "sustainability_investment": 10000000,
-                "csr_investment": 5000000 
+                "csr_investment": 5000000,
+                "employee_investment": 6000000 # Employee programs investment
             }
         }
         
@@ -141,19 +176,24 @@ class TestGameFunctionality(unittest.TestCase):
         self.assertEqual(updated_team.products["budget"]["price"], 249)
 
         # Check capital reduction by at least the sum of direct investments
-        # Sum of investments: 25M + 15M + 30M + 20M + 10M + 5M = 105M
-        min_expected_capital_reduction = 105000000
+        min_expected_capital_reduction = 133000000 # Updated sum
         self.assertLess(updated_team.capital, initial_capital - min_expected_capital_reduction + 1, 
                         "Capital not reduced by at least the sum of direct investments.")
 
         # Check R&D changes
         self.assertGreater(updated_team.r_d_capability, initial_r_d_capability, "R&D capability should increase.")
         self.assertGreater(updated_team.r_d_effectiveness, initial_r_d_effectiveness, "R&D effectiveness should increase.")
+        self.assertGreater(updated_team.innovation_index, initial_innovation_index, "Innovation index should increase due to R&D budget and focus.")
+
+        # Check Operations changes
+        self.assertGreater(updated_team.production_capacity, initial_production_capacity, "Production capacity should increase.")
+        self.assertGreater(updated_team.quality_control, initial_quality_control, "Quality control should increase.")
 
         # Check corporate strategy changes
         self.assertGreater(updated_team.brand_strength, initial_brand_strength, "Brand strength should increase.")
         self.assertGreater(updated_team.environmental_impact, initial_environmental_impact, "Environmental impact score should increase.")
         self.assertGreater(updated_team.csr_rating, initial_csr_rating, "CSR rating should increase.")
+        self.assertGreater(updated_team.employee_satisfaction, initial_employee_satisfaction, "Employee satisfaction should increase.")
         
         # Check if team was added to submissions for the round
         round_str = str(self.game_state.current_round)

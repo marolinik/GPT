@@ -21,14 +21,19 @@ class FilePickleStorage:
     with atomic operations to ensure reliability.
     """
     def __init__(self, storage_dir=None):
-        if storage_dir is None:
-            # Use a Windows-friendly directory in the user's home
-            self.storage_dir = os.path.join(os.path.expanduser("~"), "strategy_masters_data")
-        else:
+        if storage_dir is not None:
             self.storage_dir = storage_dir
+            logger.info(f"Using data storage path (from argument): {self.storage_dir}")
+        elif os.environ.get("STRATEGY_MASTERS_DATA_DIR"):
+            self.storage_dir = os.environ.get("STRATEGY_MASTERS_DATA_DIR")
+            logger.info(f"Using data storage path (from STRATEGY_MASTERS_DATA_DIR env var): {self.storage_dir}")
+        else:
+            self.storage_dir = "./game_data" # Default path
+            logger.info(f"Using data storage path (default): {self.storage_dir}")
+
         # Ensure storage directory exists
         os.makedirs(self.storage_dir, exist_ok=True)
-        logger.info(f"Initialized FilePickleStorage with directory: {self.storage_dir}")
+        # No need for an additional general log message as specific ones are above.
         
     def _get_file_path(self, key):
         """Get the file path for a key, ensuring it's safe for filesystem use"""

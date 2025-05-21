@@ -123,8 +123,8 @@
                                                         <input type="number" class="form-control" id="premiumVolume" min="10000" max="1000000" step="10000" value="100000" data-category="product" data-segment="premium" data-field="production_volume">
                                                     </div>
                                                     <div class="col-md-6 mb-3">
-                                                        <label for="premiumMarketing" class="form-label">Marketing Budget ($M)</label>
-                                                        <input type="number" class="form-control" id="premiumMarketing" min="1" max="100" step="1" value="20" data-category="product" data-segment="premium" data-field="marketing_budget">
+                                                        <label for="premiumMarketing" class="form-label">Marketing Budget ($)</label>
+                                                        <input type="number" class="form-control" id="premiumMarketing" min="0" max="100000000" step="1000000" value="20000000" data-category="product" data-segment="premium" data-field="marketing_budget">
                                                     </div>
                                                 </div>
                                             </div>
@@ -160,8 +160,8 @@
                                                         <input type="number" class="form-control" id="midRangeVolume" min="50000" max="2000000" step="50000" value="200000" data-category="product" data-segment="mid_range" data-field="production_volume">
                                                     </div>
                                                     <div class="col-md-6 mb-3">
-                                                        <label for="midRangeMarketing" class="form-label">Marketing Budget ($M)</label>
-                                                        <input type="number" class="form-control" id="midRangeMarketing" min="1" max="100" step="1" value="15" data-category="product" data-segment="mid_range" data-field="marketing_budget">
+                                                        <label for="midRangeMarketing" class="form-label">Marketing Budget ($)</label>
+                                                        <input type="number" class="form-control" id="midRangeMarketing" min="0" max="100000000" step="1000000" value="15000000" data-category="product" data-segment="mid_range" data-field="marketing_budget">
                                                     </div>
                                                 </div>
                                             </div>
@@ -197,28 +197,85 @@
                                                         <input type="number" class="form-control" id="budgetVolume" min="100000" max="5000000" step="100000" value="300000" data-category="product" data-segment="budget" data-field="production_volume">
                                                     </div>
                                                     <div class="col-md-6 mb-3">
-                                                        <label for="budgetMarketing" class="form-label">Marketing Budget ($M)</label>
-                                                        <input type="number" class="form-control" id="budgetMarketing" min="1" max="100" step="1" value="10" data-category="product" data-segment="budget" data-field="marketing_budget">
+                                                        <label for="budgetMarketing" class="form-label">Marketing Budget ($)</label>
+                                                        <input type="number" class="form-control" id="budgetMarketing" min="0" max="100000000" step="1000000" value="10000000" data-category="product" data-segment="budget" data-field="marketing_budget">
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    
-                                    <h4 class="mt-4">Corporate Strategy</h4>
-                                    
+
+                                    <hr class="my-4">
+
+                                    <h4 class="mt-4">Research & Development</h4>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="rdBudget" class="form-label">R&D Budget ($)</label>
+                                            <input type="number" class="form-control" id="rdBudget" data-category="r_d" data-field="budget" min="0" step="1000000" value="20000000">
+                                        </div>
+                                    </div>
+                                    <h5>R&D Focus Allocation</h5>
+                                    <p class="form-text text-muted">Allocate R&D Focus (0-100 points total, affects innovation index for specific components):</p>
                                     <div class="row">
                                         <div class="col-md-4 mb-3">
-                                            <label for="rdInvestment" class="form-label">R&D Investment ($M)</label>
-                                            <input type="number" class="form-control" id="rdInvestment" min="0" max="100" step="5" value="25" data-category="strategy" data-field="rd_investment">
+                                            <label for="rdFocusCamera" class="form-label">Camera Focus (points)</label>
+                                            <input type="number" class="form-control" id="rdFocusCamera" data-category="r_d_focus" data-field="camera" min="0" max="100" step="5" value="20">
                                         </div>
                                         <div class="col-md-4 mb-3">
-                                            <label for="brandInvestment" class="form-label">Brand Investment ($M)</label>
-                                            <input type="number" class="form-control" id="brandInvestment" min="0" max="100" step="5" value="20" data-category="strategy" data-field="brand_investment">
+                                            <label for="rdFocusBattery" class="form-label">Battery Focus (points)</label>
+                                            <input type="number" class="form-control" id="rdFocusBattery" data-category="r_d_focus" data-field="battery" min="0" max="100" step="5" value="20">
                                         </div>
                                         <div class="col-md-4 mb-3">
-                                            <label for="sustainabilityInvestment" class="form-label">Sustainability ($M)</label>
-                                            <input type="number" class="form-control" id="sustainabilityInvestment" min="0" max="50" step="5" value="10" data-category="strategy" data-field="sustainability_investment">
+                                            <label for="rdFocusProcessor" class="form-label">Processor Focus (points)</label>
+                                            <input type="number" class="form-control" id="rdFocusProcessor" data-category="r_d_focus" data-field="processor" min="0" max="100" step="5" value="20">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <label for="rdFocusDisplay" class="form-label">Display Focus (points)</label>
+                                            <input type="number" class="form-control" id="rdFocusDisplay" data-category="r_d_focus" data-field="display" min="0" max="100" step="5" value="10">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label for="rdFocusSoftware" class="form-label">Software Focus (points)</label>
+                                            <input type="number" class="form-control" id="rdFocusSoftware" data-category="r_d_focus" data-field="software" min="0" max="100" step="5" value="10">
+                                        </div>
+                                    </div>
+
+                                    <hr class="my-4">
+                                    
+                                    <h4 class="mt-4">Operations</h4>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="opsCapacityInvestment" class="form-label">Production Capacity Investment ($)</label>
+                                            <input type="number" class="form-control" id="opsCapacityInvestment" data-category="operations" data-field="capacity_investment" min="0" step="1000000" value="10000000">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="opsQualityInvestment" class="form-label">Quality Control Investment ($)</label>
+                                            <input type="number" class="form-control" id="opsQualityInvestment" data-category="operations" data-field="quality_investment" min="0" step="1000000" value="5000000">
+                                        </div>
+                                    </div>
+
+                                    <hr class="my-4">
+
+                                    <h4 class="mt-4">Corporate Strategy</h4>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="corpBrandInvestment" class="form-label">Brand Investment ($)</label>
+                                            <input type="number" class="form-control" id="corpBrandInvestment" data-category="corporate" data-field="brand_investment" min="0" max="100000000" step="1000000" value="20000000">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="corpSustainabilityInvestment" class="form-label">Sustainability Investment ($)</label>
+                                            <input type="number" class="form-control" id="corpSustainabilityInvestment" data-category="corporate" data-field="sustainability_investment" min="0" max="50000000" step="500000" value="10000000">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="corpCsrInvestment" class="form-label">CSR Investment ($)</label>
+                                            <input type="number" class="form-control" id="corpCsrInvestment" data-category="corporate" data-field="csr_investment" min="0" step="1000000" value="3000000">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="corpEmployeeInvestment" class="form-label">Employee Programs Investment ($)</label>
+                                            <input type="number" class="form-control" id="corpEmployeeInvestment" data-category="corporate" data-field="employee_investment" min="0" step="1000000" value="2000000">
                                         </div>
                                     </div>
                                     
