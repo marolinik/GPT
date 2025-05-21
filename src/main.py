@@ -6,8 +6,6 @@ Flask web application for MBA strategy simulation game
 import os
 import json
 import logging
-import secrets
-import time
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify, redirect, url_for, abort
 
