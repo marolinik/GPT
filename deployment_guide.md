@@ -21,7 +21,13 @@ This document provides instructions for deploying and running the StrategyMaster
    pip install -r requirements.txt
    ```
 
-3. **Run the application locally**:
+3. **Run the test suite**:
+   ```bash
+   python -m unittest discover -s src
+   ```
+   Ensure all tests pass before running the application.
+
+4. **Run the application locally**:
    ```bash
    python src/main.py
    ```
