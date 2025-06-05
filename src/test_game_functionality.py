@@ -585,5 +585,21 @@ class TestGameFunctionality(unittest.TestCase):
         team.calculate_score()
         self.assertTrue(team.score > 0)
 
+    def test_full_game_simulation(self):
+        """Run a complete game with empty decisions each round."""
+        game_state = GameState(num_teams=5, num_rounds=10)
+        game_state.initialize_game()
+
+        # Loop until the game reports it has finished
+        while not game_state.finished:
+            # Submit empty decisions for all teams for the current round
+            for team_id in list(game_state.teams.keys()):
+                result = game_state.process_team_decisions(team_id, {})
+                self.assertTrue(result, f"Submission failed for {team_id}")
+
+        # After the loop the game should be finished and rankings available
+        self.assertTrue(game_state.finished)
+        self.assertEqual(len(game_state.get_rankings()), 5)
+
 if __name__ == "__main__":
     unittest.main() 
